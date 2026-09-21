@@ -30,5 +30,6 @@ namespace ExamManagement.Data
         public DbSet<Exam> Exams { get; set; }
         public DbSet<ExamEligibility> ExamEligibilities { get; set; }
         public DbSet<StudentProfile> StudentProfiles { get; set; }
+        public DbSet<StudentApplication> StudentApplications { get; set; }
     }
 }
