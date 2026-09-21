@@ -1,0 +1,200 @@
+﻿@model IEnumerable<ExamManagement.Models.Exam>
+
+@{
+    ViewData["Title"] = "Exam Management";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Exam Management</h2>
+            <p class="text-muted mb-0">
+                Create and manage examinations.
+            </p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>
+            Create Exam
+        </a>
+    </div>
+
+    <!-- Success Message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button"class="btn-close"data-bs-dismiss="alert">
+            </button>
+        </div>
+    }
+
+    <!-- Exam List Card -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-mortarboard me-2"></i>
+                Examination List
+            </h5>
+        </div>
+
+        <div class="card-body p-0">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <div class="mb-3"><i class="bi bi-journal-x fs-1 text-muted"></i></div>
+                    <h5 class="mb-2">No examinations found.</h5>
+                    <p class="text-muted mb-3">Create your first examination.</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>
+                        Create Exam
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-3 text-start">
+                                    Exam Name
+                                </th>
+
+                                <th class="text-center">
+                                    Code
+                                </th>
+
+                                <th class="text-center">
+                                    Type
+                                </th>
+
+                                <th class="text-center">
+                                    Application Period
+                                </th>
+
+                                <th class="text-center">
+                                    Exam Date
+                                </th>
+
+                                <th class="text-center">
+                                    Fee
+                                </th>
+
+                                <th class="text-center">
+                                    Status
+                                </th>
+
+                                <th class="text-center px-3">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var exam in Model)
+                            {
+                                <tr>
+                                    <!-- Exam Name -->
+                                    <td class="px-3">
+                                        <div class="fw-semibold">@exam.ExamName</div>
+                                    </td>
+                                    <!-- Code -->
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border">@exam.ExamCode</span>
+                                    </td>
+                                    <!-- Type -->
+                                    <td class="text-center">@exam.ExamType</td>
+                                    <!-- Application Period -->
+                                    <td class="text-center text-nowrap">
+                                        <div>@exam.ApplicationStartDate.ToString("dd MMM yyyy")</div>
+                                        <small class="text-muted">to</small>
+                                        <div>@exam.ApplicationEndDate.ToString("dd MMM yyyy")</div>
+                                    </td>
+                                    <!-- Exam Date -->
+                                    <td class="text-center text-nowrap">
+                                        <i class="bi bi-calendar-event me-1 text-muted"></i>
+                                        @exam.ExamDate.ToString("dd MMM yyyy")
+                                    </td>
+                                    <!-- Fee -->
+                                    <td class="text-center text-nowrap fw-semibold">
+                                        ₹@exam.ApplicationFee.ToString("N2")
+                                    </td>
+                                    <!-- Status -->
+                                    <td class="text-center">
+                                        @if (exam.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Active
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-dash-circle me-1"></i>
+                                                Inactive
+                                            </span>
+                                        }
+                                    </td>
+                                    <!-- Actions -->
+                                    <td class="px-3">
+                                        <div class="d-flex justify-content-center align-items-center gap-1 flex-wrap">
+                                            <!-- Details -->
+                                            <a asp-action="Details"
+                                               asp-route-id="@exam.Id"class="btn btn-sm btn-outline-info"title="View Details">
+                                                <i class="bi bi-eye me-1"></i>
+                                                Details
+                                            </a>
+                                            <!-- Edit -->
+                                            <a asp-action="Edit"
+                                               asp-route-id="@exam.Id"class="btn btn-sm btn-outline-primary"title="Edit Exam">
+                                                <i class="bi bi-pencil me-1"></i>
+                                                Edit
+                                            </a>
+                                            <!-- Apply Link -->
+                                            @if (exam.IsActive)
+                                            {
+                                                <a asp-controller="Exam"
+                                                   asp-action="Apply"
+                                                   asp-route-id="@exam.Id"target="_blank"class="btn btn-sm btn-outline-success"
+                                                   title="Open Application Link">
+                                                    <i class="bi bi-link-45deg me-1"></i>
+                                                    Apply
+                                                </a>
+                                            }
+                                            <!-- Activate / Deactivate -->
+                                            <form asp-action="ToggleStatus"
+                                                  asp-route-id="@exam.Id"method="post"class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                @if (exam.IsActive)
+                                                {
+                                                    <button type="submit"class="btn btn-sm btn-outline-danger"
+                                                            title="Deactivate Exam">
+                                                        <i class="bi bi-toggle-off me-1"></i>
+                                                        Deactivate
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="submit"class="btn btn-sm btn-outline-success"
+                                                            title="Activate Exam">
+                                                        <i class="bi bi-toggle-on me-1"></i>
+                                                        Activate
+                                                    </button>
+                                                }
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

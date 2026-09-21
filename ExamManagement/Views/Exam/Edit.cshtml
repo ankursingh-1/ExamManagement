@@ -1,0 +1,285 @@
+﻿@model ExamManagement.Models.Exam
+
+@{
+    ViewData["Title"] = "Edit Exam";
+}
+
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <h2>Edit Examination</h2>
+        <p class="text-muted">
+            Update examination information.
+        </p>
+    </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- Basic Information -->
+                <div class="card shadow-sm border-0 mt-4 mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Basic Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Existing Basic Information fields -->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ExamName" class="form-label"></label>
+                        <input asp-for="ExamName" class="form-control" placeholder="Enter exam name" />
+                        <span asp-validation-for="ExamName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="ExamCode" class="form-label"></label>
+                        <input asp-for="ExamCode" class="form-control" placeholder="Example: ABC2026" />
+                        <span asp-validation-for="ExamCode" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="ExamType" class="form-label"></label>
+                        <select asp-for="ExamType" class="form-select">
+                            <option value="">Select Exam Type</option>
+                            <option value="Entrance Exam">Entrance Exam</option>
+                            <option value="Admission Exam">Admission Exam</option>
+                            <option value="Scholarship Exam">Scholarship Exam</option>
+                            <option value="Recruitment Exam">Recruitment Exam</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span asp-validation-for="ExamType" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3"
+                                  placeholder="Enter exam description"></textarea>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- Application Schedule -->
+                <div class="card shadow-sm border-0 mt-4 mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calendar-event me-2"></i>Application Schedule
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Existing Application Schedule fields -->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ApplicationStartDate" class="form-label"></label>
+                        <input asp-for="ApplicationStartDate" type="date" class="form-control" />
+                        <span asp-validation-for="ApplicationStartDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ApplicationEndDate" class="form-label"></label>
+                        <input asp-for="ApplicationEndDate" type="date" class="form-control" />
+                        <span asp-validation-for="ApplicationEndDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- Examination Schedule -->
+                <div class="card shadow-sm border-0 mt-4 mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calendar-check me-2"></i>Examination Schedule
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Existing Examination Schedule fields -->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="ExamDate" class="form-label"></label>
+                        <input asp-for="ExamDate" type="date" class="form-control" />
+                        <span asp-validation-for="ExamDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="StartTime" class="form-label"></label>
+                        <input asp-for="StartTime" type="time" class="form-control" />
+                        <span asp-validation-for="StartTime" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="EndTime" class="form-label"></label>
+                        <input asp-for="EndTime" type="time" class="form-control" />
+                        <span asp-validation-for="EndTime" class="text-danger"></span>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- Application Fee -->
+                <div class="card shadow-sm border-0 mt-4 mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-currency-rupee me-2"></i>Application Fee
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Existing Application Fee fields -->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="ApplicationFee" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"> ₹ </span>
+                            <input asp-for="ApplicationFee" type="number" step="0.01" min="0" class="form-control" />
+                        </div>
+                        <span asp-validation-for="ApplicationFee" class="text-danger"></span>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- Eligibility -->
+                @* <h5 class="mb-3">Eligibility</h5>
+                <div class="mb-3">
+                    <textarea asp-for="Eligibility" class="form-control" rows="4"placeholder="Enter eligibility criteria"></textarea>
+                </div> *@
+
+                <!-- Eligibility Configuration -->
+                <div class="card shadow-sm border-0 mt-4 mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-mortarboard me-2"></i>Eligibility Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Qualification Required -->
+                        <h6 class="fw-bold mb-3">Qualification Required</h6>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input type="checkbox"name="Requires10th"value="true"class="form-check-input"
+                                           id="requires10th"@(Model.EligibilityConfiguration?.Requires10th == true ? "checked" : "") />
+                                    <label class="form-check-label"for="requires10th">10th</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input type="checkbox"name="Requires12th"value="true"class="form-check-input"
+                                           id="requires12th"@(Model.EligibilityConfiguration?.Requires12th == true ? "checked" : "") />
+                                    <label class="form-check-label"for="requires12th">12th</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input type="checkbox"name="RequiresGraduation"value="true"class="form-check-input"
+                                    id="requiresGraduation"@(Model.EligibilityConfiguration?.RequiresGraduation == true ? "checked" : "") />
+                                    <label class="form-check-label"for="requiresGraduation">Graduation</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 12th Qualification Status -->
+                        <h6 class="fw-bold mb-3">12th Qualification Status</h6>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input type="checkbox"name="Allow12thPassed"value="true"class="form-check-input"id="allowPassed"
+                                           @(Model.EligibilityConfiguration?.Allow12thPassed == true ? "checked" : "") />
+                                    <label class="form-check-label"for="allowPassed">Passed</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input type="checkbox"name="Allow12thAppearing"value="true"class="form-check-input"
+                                           id="allowAppearing"@(Model.EligibilityConfiguration?.Allow12thAppearing == true ? "checked" : "") />
+                                    <label class="form-check-label"for="allowAppearing">Appearing</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input type="checkbox"name="Allow12thResultAwaited"value="true"
+                                           class="form-check-input"id="allowResultAwaited"
+                                           @(Model.EligibilityConfiguration?.Allow12thResultAwaited == true ? "checked" : "") />
+                                    <label class="form-check-label"for="allowResultAwaited">Result Awaited</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Minimum Percentage -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Minimum Percentage</label>
+                                <input type="number"name="MinimumPercentage"class="form-control"min="0"max="100"step="0.01"
+                                       value="@Model.EligibilityConfiguration?.MinimumPercentage"placeholder="Example: 50" />
+                            </div>
+                        </div>
+                        <hr class="my-4" />
+
+                        <!-- Required Subjects -->
+                        <h6 class="fw-bold mb-3">Required Subjects</h6>
+                        <div class="row">
+
+                            <!-- Physics -->
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input type="checkbox"name="RequiresPhysics"value="true"class="form-check-input"id="physics"
+                                           @(Model.EligibilityConfiguration?.RequiresPhysics == true ? "checked" : "") />
+                                    <label class="form-check-label"for="physics">Physics</label>
+                                </div>
+                            </div>
+
+                            <!-- Chemistry -->
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input type="checkbox"name="RequiresChemistry"value="true" class="form-check-input"id="chemistry"
+                                           @(Model.EligibilityConfiguration?.RequiresChemistry == true ? "checked" : "") />
+                                    <label class="form-check-label"for="chemistry">Chemistry</label>
+                                </div>
+                            </div>
+
+                            <!-- Biology -->
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input type="checkbox"name="RequiresBiology"value="true"class="form-check-input"id="biology"
+                                           @(Model.EligibilityConfiguration?.RequiresBiology == true ? "checked" : "") />
+                                    <label class="form-check-label"for="biology">Biology
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Mathematics -->
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input type="checkbox"name="RequiresMathematics"value="true"class="form-check-input"id="mathematics"
+                                           @(Model.EligibilityConfiguration?.RequiresMathematics == true ? "checked" : "") />
+                                    <label class="form-check-label"for="mathematics">Mathematics</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="card shadow-sm border-0 mt-4 mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-check me-2"></i>Instructions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea asp-for="Instructions"class="form-control"rows="6"
+                                  placeholder="Enter examination instructions"></textarea>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Update Exam</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

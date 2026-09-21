@@ -1,0 +1,97 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Admin Dashboard</h2>
+            <p class="text-muted mb-0">
+                Welcome to the Examination Management System.
+            </p>
+        </div>
+        <div>
+            <span class="badge bg-success px-3 py-2">
+                <i class="bi bi-check-circle me-1"></i>
+                Admin Logged In
+            </span>
+        </div>
+    </div>
+
+    <!-- Authentication Message -->
+    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4"
+         role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+            <div>
+                <strong>Authentication Successful</strong>
+                <div class="small">
+                    You are logged in as Administrator.
+                </div>
+            </div>
+        </div>
+        <!-- Close Button -->
+        <button type="button"class="btn-close"data-bs-dismiss="alert"aria-label="Close"></button>
+    </div>
+
+    <!-- Dashboard Cards -->
+    <div class="row g-4">
+        <!-- Exam Management -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="dashboard-icon mb-3">
+                        <i class="bi bi-journal-text"></i>
+                    </div>
+                    <h5 class="fw-bold">Exam Management</h5>
+                    <p class="text-muted">
+                        Create, edit, view and manage examinations.
+                    </p>
+                    <a asp-controller="Exam" asp-action="Index"
+                       class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Manage Exams
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Institute Settings -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="dashboard-icon mb-3">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h5 class="fw-bold">Institute Settings</h5>
+                    <p class="text-muted">
+                        Manage institute name, logo, address and contact details.
+                    </p>
+                    <a asp-controller="Settings" asp-action="Institute"
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-gear me-1"></i>Institute Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applications -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="dashboard-icon mb-3">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h5 class="fw-bold">Applications</h5>
+                    <p class="text-muted">
+                        View and manage student examination applications.
+                    </p>
+                    <button type="button" class="btn btn-outline-secondary" disabled>
+                        <i class="bi bi-clock me-1"></i>Coming Soon
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

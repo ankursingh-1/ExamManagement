@@ -1,0 +1,219 @@
+﻿@model ExamManagement.Models.Exam
+
+@{
+    ViewData["Title"] = "Apply - " + Model.ExamName;
+}
+
+<div class="container py-5">
+    <!-- Exam Header -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="badge bg-primary mb-2">@Model.ExamType</span>
+                    <h1 class="fw-bold mb-2">@Model.ExamName</h1>
+                    <p class="text-muted mb-0">
+                        Exam Code:
+                        <strong>@Model.ExamCode</strong>
+                    </p>
+                </div>
+                @if (Model.IsActive)
+                {
+                    <span class="badge bg-success fs-6">Applications Open</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Information -->
+    <div class="row g-4">
+        <!-- Left -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-3">About the Examination</h4>
+                    <p class="text-muted">@Model.Description</p>
+                </div>
+            </div>
+
+            <!-- Eligibility -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+
+                    <h4 class="fw-bold mb-3">
+                        <i class="bi bi-mortarboard me-2"></i>
+                        Eligibility Criteria
+                    </h4>
+
+                    @if (Model.EligibilityConfiguration != null)
+                    {
+                        <ul class="list-group list-group-flush">
+
+                            @if (Model.EligibilityConfiguration.Requires10th)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    10th qualification required
+                                </li>
+                            }
+
+                            @if (Model.EligibilityConfiguration.Requires12th)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    12th qualification required
+                                </li>
+                            }
+
+                            @if (Model.EligibilityConfiguration.RequiresGraduation)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Graduation qualification required
+                                </li>
+                            }
+
+                            @if (Model.EligibilityConfiguration.Allow12thPassed)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    12th Passed candidates are eligible
+                                </li>
+                            }
+
+                            @if (Model.EligibilityConfiguration.Allow12thAppearing)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    12th Appearing candidates are eligible
+                                </li>
+                            }
+
+                            @if (Model.EligibilityConfiguration.Allow12thResultAwaited)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    12th Result Awaited candidates are eligible
+                                </li>
+                            }
+
+                            @if (Model.EligibilityConfiguration.MinimumPercentage.HasValue)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Minimum Percentage:
+                                    <strong>
+                                        @Model.EligibilityConfiguration.MinimumPercentage%
+                                    </strong>
+                                </li>
+                            }
+
+                            @if (Model.EligibilityConfiguration.RequiresPhysics)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Physics required
+                                </li>
+                            }
+
+                            @if (Model.EligibilityConfiguration.RequiresChemistry)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Chemistry required
+                                </li>
+                            }
+
+                            @if (Model.EligibilityConfiguration.RequiresBiology)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Biology required
+                                </li>
+                            }
+
+                            @if (Model.EligibilityConfiguration.RequiresMathematics)
+                            {
+                                <li class="list-group-item px-0">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Mathematics required
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">
+                            Eligibility criteria have not been configured yet.
+                        </p>
+                    }
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-3">Important Instructions</h4>
+                    <div class="text-muted">@Model.Instructions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Examination Details</h5>
+
+                    <!-- Application Dates -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Application Start Date</small>
+                        <strong>@Model.ApplicationStartDate.ToString("dd MMM yyyy")</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Application Last Date</small>
+                        <strong>@Model.ApplicationEndDate.ToString("dd MMM yyyy")</strong>
+                    </div>
+
+                    <!-- Exam Date -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Examination Date</small>
+                        <strong>@Model.ExamDate.ToString("dd MMM yyyy")</strong>
+                    </div>
+
+                    <!-- Time -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Examination Time</small>
+                        <strong>@Model.StartTime - @Model.EndTime</strong>
+                    </div>
+
+                    <!-- Fee -->
+                    <div class="mb-4">
+                        <small class="text-muted d-block">Application Fee</small>
+                        <h4 class="fw-bold text-primary mb-0">₹@Model.ApplicationFee</h4>
+                    </div>
+                    <hr />
+                    <!-- Apply Button -->
+                    @if (Model.IsActive)
+                    {
+                        <a asp-controller="Account"asp-action="Register"asp-route-examId="@Model.Id"
+                           class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Apply Now
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary btn-lg w-100"disabled>
+                            Applications Closed
+                        </button>
+                    }
+                    <p class="text-muted small text-center mt-3 mb-0">
+                        Registration is required before
+                        completing the application.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
