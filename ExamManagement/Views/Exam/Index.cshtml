@@ -32,6 +32,16 @@
         </div>
     }
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert">
+            </button>
+        </div>
+    }
+
     <!-- Exam List Card -->
     <div class="card shadow-sm border-0">
         <div class="card-header bg-primary text-white">
@@ -172,21 +182,38 @@
                                                 @Html.AntiForgeryToken()
                                                 @if (exam.IsActive)
                                                 {
-                                                    <button type="submit"class="btn btn-sm btn-outline-danger"
-                                                            title="Deactivate Exam">
+                                                    <button type="submit"class="btn btn-sm btn-outline-danger" title="Deactivate Exam">
                                                         <i class="bi bi-toggle-off me-1"></i>
                                                         Deactivate
                                                     </button>
                                                 }
                                                 else
                                                 {
-                                                    <button type="submit"class="btn btn-sm btn-outline-success"
-                                                            title="Activate Exam">
+                                                    <button type="submit"class="btn btn-sm btn-outline-success" title="Activate Exam">
                                                         <i class="bi bi-toggle-on me-1"></i>
                                                         Activate
                                                     </button>
                                                 }
                                             </form>
+                                            <!-- Delete -->
+                                            @{
+                                                var canDelete = exam.ApplicationEndDate.Date < DateTime.Today
+                                                || exam.ExamDate.Date < DateTime.Today;
+                                            }
+
+                                            @if (canDelete)
+                                            {
+                                                <form asp-action="Delete"
+                                                      asp-route-id="@exam.Id" method="post" class="d-inline"
+                                                      onsubmit="return confirm('Are you sure you want to delete this examination? This action cannot be undone.');">
+                                                    @Html.AntiForgeryToken()
+
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Exam">
+                                                        <i class="bi bi-trash me-1"></i>
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            }
                                         </div>
                                     </td>
                                 </tr>

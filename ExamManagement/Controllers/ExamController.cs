@@ -252,5 +252,57 @@ namespace ExamManagement.Controllers
             }
             return View(exam);
         }
+
+        // POST: /Exam/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var exam = await _context.Exams
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (exam == null)
+            {
+                return NotFound();
+            }
+
+            // Exam can only be deleted after application deadline
+            // or after the examination date has passed.
+            var today = DateTime.Today;
+
+            if (exam.ApplicationEndDate.Date >= today &&
+                exam.ExamDate.Date >= today)
+            {
+                TempData["ErrorMessage"] =
+                    "This examination cannot be deleted before its application deadline or examination date has passed.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Do not delete an exam if student applications already exist.
+            var hasApplications = await _context.StudentApplications
+                .AnyAsync(x => x.ExamId == id);
+
+            if (hasApplications)
+            {
+                TempData["ErrorMessage"] =
+                    "This examination cannot be deleted because student applications already exist for this exam.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Delete eligibility configuration first.
+            var eligibility = await _context.ExamEligibilities
+                .FirstOrDefaultAsync(x => x.ExamId == id);
+
+            if (eligibility != null)
+            {
+                _context.ExamEligibilities.Remove(eligibility);
+            }
+
+            // Delete exam.
+            _context.Exams.Remove(exam);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Examination deleted successfully.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
