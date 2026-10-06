@@ -1,0 +1,358 @@
+﻿@model ExamManagement.ViewModels.StudentQualificationViewModel
+
+@{
+    ViewData["Title"] = "Qualification Details";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Student Application</h2>
+        <p class="text-muted mb-0">@ViewBag.ExamName</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-semibold">Step 2 of 6</span>
+                <span class="text-muted">Qualification Details</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar"role="progressbar"style="width: 33.33%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Form -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-mortarboard me-2"></i>
+                Qualification Details
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Qualification" method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="ApplicationId" type="hidden" />
+                <input asp-for="ExamId" type="hidden" />
+                <div asp-validation-summary="ModelOnly"class="alert alert-danger"role="alert"></div>
+
+                <!-- 10th Qualification -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-book me-2 text-primary"></i>
+                            10th Qualification
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="form-check pt-2">
+                                    <input asp-for="Has10thQualification"class="form-check-input" />
+                                    <label asp-for="Has10thQualification"
+                                           class="form-check-label fw-semibold">
+                                    </label>
+                                </div>
+                                <span asp-validation-for="Has10thQualification"class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="TenthPercentage"class="form-label fw-semibold"></label>
+                                <div class="input-group">
+                                    <input asp-for="TenthPercentage"class="form-control"type="number"
+                                    step="0.01"min="0"max="100"placeholder="Enter percentage" />
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <span asp-validation-for="TenthPercentage"class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 12th Qualification -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-journal-text me-2 text-primary"></i>
+                            12th Qualification
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label asp-for="TwelfthStatus"class="form-label fw-semibold"></label>
+                                <select asp-for="TwelfthStatus"class="form-select">
+                                    <option value="">-- Select Status --</option>
+                                    <option value="Passed">Passed</option>
+                                    <option value="Appearing">Appearing</option>
+                                    <option value="Result Awaited">Result Awaited</option>
+                                </select>
+                                <span asp-validation-for="TwelfthStatus"class="text-danger"></span>
+                            </div>
+
+                            <!-- Percentage -->
+                            <div class="col-md-6">
+                                <label asp-for="TwelfthPercentage"class="form-label fw-semibold"></label>
+                                <div class="input-group">
+                                    <input asp-for="TwelfthPercentage"class="form-control"type="number"
+                                           step="0.01"min="0"max="100"placeholder="Enter percentage" />
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <span asp-validation-for="TwelfthPercentage"class="text-danger"></span>
+                            </div>
+                            <div class="form-text">
+                                Required only if 12th status is Passed.
+                            </div>
+
+                            <!-- Board -->
+                            <div class="col-md-6">
+                                <label asp-for="TwelfthBoard"class="form-label fw-semibold"></label>
+                                <input asp-for="TwelfthBoard"class="form-control"placeholder="Enter board name" />
+                                <span asp-validation-for="TwelfthBoard"class="text-danger"></span>
+                            </div>
+
+                            <!-- Passing Year -->
+                            <div class="col-md-6">
+                                <label asp-for="TwelfthPassingYear"class="form-label fw-semibold"></label>
+                                <input asp-for="TwelfthPassingYear"class="form-control"type="number"
+                                       min="1900"max="2100"placeholder="Enter passing year" />
+                                <span asp-validation-for="TwelfthPassingYear"class="text-danger"></span>
+                            </div>
+                            <div class="form-text">
+                                Required only if 12th status is Passed.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subjects -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-list-check me-2 text-primary"></i>
+                            Subjects
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-4">Select the subjects studied by the student.</p>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="border rounded p-3 h-100">
+                                    <div class="form-check">
+                                        <input asp-for="HasPhysics"class="form-check-input"type="checkbox" />
+                                        <label asp-for="HasPhysics"class="form-check-label fw-semibold"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="border rounded p-3 h-100">
+                                    <div class="form-check">
+                                        <input asp-for="HasChemistry"class="form-check-input"type="checkbox" />
+                                        <label asp-for="HasChemistry"
+                                               class="form-check-label fw-semibold">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="border rounded p-3 h-100">
+                                    <div class="form-check">
+                                        <input asp-for="HasBiology"class="form-check-input"type="checkbox" />
+                                        <label asp-for="HasBiology"
+                                               class="form-check-label fw-semibold">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="border rounded p-3 h-100">
+                                    <div class="form-check">
+                                        <input asp-for="HasMathematics"class="form-check-input"type="checkbox" />
+                                        <label asp-for="HasMathematics"
+                                               class="form-check-label fw-semibold">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject Validation -->
+                        <div id="subjectValidation"class="text-danger small fw-semibold mt-3"></div>
+                    </div>
+                </div>
+
+                <!-- Graduation -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-mortarboard-fill me-2 text-primary"></i>
+                            Graduation
+                        </h6>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Graduation Checkbox -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input asp-for="HasGraduation"class="form-check-input"id="HasGraduation" />
+                                <label asp-for="HasGraduation"class="form-check-label fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="HasGraduation"class="text-danger"></span>
+                        </div>
+                        <div class="row g-4">
+
+                            <!-- Course -->
+                            <div class="col-md-6">
+                                <label asp-for="GraduationCourse"class="form-label fw-semibold"></label>
+                                <input asp-for="GraduationCourse"class="form-control"
+                                       placeholder="e.g. BA, B.Com, B.Sc, BCA, B.Tech" />
+                                <span asp-validation-for="GraduationCourse"class="text-danger"></span>
+                            </div>
+
+                            <!-- Percentage -->
+                            <div class="col-md-6">
+                                <label asp-for="GraduationPercentage"class="form-label fw-semibold"></label>
+                                <div class="input-group">
+                                    <input asp-for="GraduationPercentage"class="form-control"type="number"
+                                           min="0"max="100"step="0.01"placeholder="Enter percentage" />
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <span asp-validation-for="GraduationPercentage"class="text-danger"></span>
+                            </div>
+
+                            <!-- Passing Year -->
+                            <div class="col-md-6">
+                                <label asp-for="GraduationPassingYear"class="form-label fw-semibold"></label>
+                                <input asp-for="GraduationPassingYear"class="form-control"type="number"
+                                       min="1900"max="2100"placeholder="Enter passing year" />
+                                <span asp-validation-for="GraduationPassingYear"class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-flex justify-content-between align-items-center pt-2">
+                    <a asp-controller="Student"
+                       asp-action="Index"class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Back
+                    </a>
+                    <button type="submit"class="btn btn-primary px-4">
+                        Save & Continue
+                        <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector("form");
+            if (!form) {
+                return;
+            }
+
+            // 12th STATUS CONDITIONAL UI VALIDATION
+            const twelfthStatus = document.getElementById("TwelfthStatus");
+            const twelfthPercentage = document.getElementById("TwelfthPercentage");
+            const twelfthPassingYear = document.getElementById("TwelfthPassingYear");
+            if (twelfthStatus) 
+            {twelfthStatus.addEventListener("change", function () {const status = this.value;
+                    const percentageValidation = document.querySelector("[data-valmsg-for='TwelfthPercentage']");
+                    const passingYearValidation = document.querySelector("[data-valmsg-for='TwelfthPassingYear']");
+
+                    // PASSED
+                    if (status === "Passed") {
+                        // Keep fields enabled
+                        twelfthPercentage.disabled = false;
+                        twelfthPassingYear.disabled = false;
+                        // Remove old validation messages
+                        if (percentageValidation) {
+                            percentageValidation.textContent = "";
+                            percentageValidation.classList.remove("field-validation-error");
+                            percentageValidation.classList.add("field-validation-valid");
+                        }
+
+                        if (passingYearValidation) {
+                            passingYearValidation.textContent = "";
+                            passingYearValidation.classList.remove("field-validation-error");
+                            passingYearValidation.classList.add("field-validation-valid");
+                        }
+
+                    }
+
+                    // APPEARING / RESULT AWAITED
+                    else {
+
+                        // These fields are optional
+                        twelfthPercentage.disabled = false;
+                        twelfthPassingYear.disabled = false;
+
+                        // CLEAR OLD SERVER VALIDATION ERRORS
+                        if (percentageValidation) {
+                            percentageValidation.textContent = "";
+                            percentageValidation.classList.remove("field-validation-error");
+                            percentageValidation.classList.add("field-validation-valid");
+                        }
+
+                        if (passingYearValidation) {
+                            passingYearValidation.textContent = "";
+                            passingYearValidation.classList.remove("field-validation-error");
+                            passingYearValidation.classList.add("field-validation-valid");
+                        }
+
+                        // Remove invalid CSS from inputs
+                        twelfthPercentage.classList.remove("input-validation-error");
+                        twelfthPassingYear.classList.remove("input-validation-error");
+                    }
+                });
+            }
+
+            // SUBJECT VALIDATION
+            form.addEventListener("submit", function (event) {
+                const physics = document.getElementById("HasPhysics").checked;
+                const chemistry = document.getElementById("HasChemistry").checked;
+                const biology = document.getElementById("HasBiology").checked;
+                const mathematics = document.getElementById("HasMathematics").checked;
+                const subjectValidation = document.getElementById("subjectValidation");
+                subjectValidation.innerHTML = "";
+
+                // Physics compulsory
+                if (!physics) {
+                    subjectValidation.innerHTML = "Physics is required.";
+                    event.preventDefault();
+                    return;
+                }
+
+                // Chemistry compulsory
+                if (!chemistry) {
+                    subjectValidation.innerHTML = "Chemistry is required.";
+                    event.preventDefault();
+                    return;
+                }
+
+                // Biology OR Mathematics
+                if (!biology && !mathematics) {
+                    subjectValidation.innerHTML = "Please select either Biology or Mathematics.";
+                    event.preventDefault();
+                    return;
+                }
+
+                // Cannot select both
+                if (biology && mathematics) {
+                    subjectValidation.innerHTML = "Please select only one: Biology or Mathematics.";
+                    event.preventDefault();
+                    return;
+                }
+            });
+        });
+    </script>
+}

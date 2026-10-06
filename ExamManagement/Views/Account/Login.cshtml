@@ -16,6 +16,7 @@
                     <form asp-action="Login"asp-controller="Account"method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden"name="returnUrl"value="@ViewData["ReturnUrl"]" />
+                        <input type="hidden"name="examId"value="@ViewBag.ExamId" />
                         <div asp-validation-summary="ModelOnly"
                              class="text-danger mb-3">
                         </div>

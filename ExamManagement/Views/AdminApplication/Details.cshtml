@@ -1,0 +1,181 @@
+﻿@model ExamManagement.Models.StudentApplication
+
+@{
+    ViewData["Title"] = "Application Details";
+
+    var exam =
+        ViewBag.Exam as ExamManagement.Models.Exam;
+
+    var centers =
+        ViewBag.Centers as List<ExamManagement.Models.ExamCenter>
+        ?? new List<ExamManagement.Models.ExamCenter>();
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Application Details</h2>
+            <p class="text-muted mb-0">@Model.ApplicationNumber</p>
+        </div>
+        <a asp-action="Index"class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">
+                Application Information
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <strong>Application Number</strong>
+                    <div>
+                        @Model.ApplicationNumber
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <strong>Status</strong>
+                    <div>
+                        @if (Model.Status == "Approved")
+                        {
+                            <span class="badge bg-success">
+                                Approved
+                            </span>
+                        }
+                        else if (Model.Status == "Rejected")
+                        {
+                            <span class="badge bg-danger">
+                                Rejected
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">
+                                @Model.Status
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <strong>Exam</strong>
+                    <div>
+                        @(exam?.ExamName ?? "-")
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <strong>Full Name</strong>
+                    <div>
+                        @Model.FullName
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <strong>Father Name</strong>
+                    <div>
+                        @Model.FatherName
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <strong>Mother Name</strong>
+                    <div>
+                        @Model.MotherName
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Status != "Approved" &&
+        Model.Status != "Rejected")
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">
+                    Approve Application
+                </h5>
+                <form asp-action="Approve"method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden"name="id"value="@Model.Id" />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Exam Center</label>
+                            <select name="examCenterId"class="form-select"required>
+                                <option value="">Select Exam Center</option>
+                                @foreach (var center in centers)
+                                {
+                                    <option value="@center.Id">
+                                        @center.CenterName -
+                                        @center.City
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Reporting Time</label>
+                            <input type="datetime-local"name="reportingTime"class="form-control"required />
+                        </div>
+                    </div>
+                    <button type="submit"class="btn btn-success mt-4">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Approve & Assign Center
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3 text-danger">
+                    Reject Application
+                </h5>
+                <form asp-action="Reject"method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden"name="id"value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rejection Reason</label>
+                        <textarea name="rejectionReason"class="form-control"rows="3"required></textarea>
+                    </div>
+                    <button type="submit"class="btn btn-danger">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Reject Application
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+    else if (Model.Status == "Approved")
+    {
+        <div class="alert alert-success">
+            <strong>Application Approved</strong>
+            <br />
+            Exam Center ID:
+            @Model.ExamCenterId
+            <br />
+            Reporting Time:
+            @Model.ExamReportingTime
+        </div>
+    }
+    else if (Model.Status == "Rejected")
+    {
+        <div class="alert alert-danger">
+            <strong>Application Rejected</strong>
+            <br />
+            Reason:
+            @Model.RejectionReason
+        </div>
+    }
+</div>

@@ -1,0 +1,391 @@
+﻿@model ExamManagement.Models.StudentApplication
+
+@{
+    ViewData["Title"] = "Application Details";
+    var exam = ViewBag.Exam as ExamManagement.Models.Exam;
+    var documents = ViewBag.Documents as List<ExamManagement.Models.StudentApplicationDocument>
+        ?? new List<ExamManagement.Models.StudentApplicationDocument>();
+    var payment = ViewBag.Payment as ExamManagement.Models.StudentApplicationPayment;
+    var centers = ViewBag.ExamCenters as List<ExamManagement.Models.ExamCenter>
+        ?? new List<ExamManagement.Models.ExamCenter>();
+}
+
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                Application Details
+            </h2>
+            <p class="text-muted mb-0">
+                @Model.ApplicationNumber
+            </p>
+        </div>
+        <a asp-action="Index"class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- BASIC DETAILS -->
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="fw-bold mb-0">
+                Application Information
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        Application Number
+                    </small>
+                    <div class="fw-semibold">
+                        @Model.ApplicationNumber
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        Student Name
+                    </small>
+                    <div class="fw-semibold">
+                        @Model.FullName
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        Email
+                    </small>
+                    <div class="fw-semibold">
+                        @Model.Email
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        Mobile
+                    </small>
+                    <div class="fw-semibold">
+                        @Model.Mobile
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        Father's Name
+                    </small>
+                    <div class="fw-semibold">
+                        @Model.FatherName
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        Mother's Name
+                    </small>
+                    <div class="fw-semibold">
+                        @Model.MotherName
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        Gender
+                    </small>
+                    <div class="fw-semibold">
+                        @Model.Gender
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        Date of Birth
+                    </small>
+                    <div class="fw-semibold">
+                        @Model.DateOfBirth
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        Status
+                    </small>
+                    <div>
+                        @if (Model.Status == "Submitted")
+                        {
+                            <span class="badge bg-warning text-dark">
+                                Submitted
+                            </span>
+                        }
+                        else if (Model.Status == "Approved")
+                        {
+                            <span class="badge bg-success">
+                                Approved
+                            </span>
+                        }
+                        else if (Model.Status == "Rejected")
+                        {
+                            <span class="badge bg-danger">
+                                Rejected
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                @Model.Status
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXAM -->
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="fw-bold mb-0">
+                Examination
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        Examination
+                    </small>
+                    <div class="fw-semibold">
+                        @exam?.ExamName
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        Examination Code
+                    </small>
+                    <div class="fw-semibold">
+                        @exam?.ExamCode
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        Examination Date
+                    </small>
+                    <div class="fw-semibold">
+                        @exam?.ExamDate
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        Application Fee
+                    </small>
+                    <div class="fw-semibold">
+                        ₹ @exam?.ApplicationFee
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAYMENT -->
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="fw-bold mb-0">
+                Payment
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (payment != null)
+            {
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <small class="text-muted">
+                            Payment Status
+                        </small>
+                        <div>
+                            <span class="badge bg-success">
+                                Paid
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">
+                            Payment ID
+                        </small>
+                        <div class="fw-semibold">
+                            @payment.PaymentId
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">
+                            Order ID
+                        </small>
+                        <div class="fw-semibold">
+                            @payment.OrderId 
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <span class="badge bg-danger">
+                    Payment Not Completed
+                </span>
+            }
+        </div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="fw-bold mb-0">
+                Documents
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (!documents.Any())
+            {
+                <div class="text-muted">
+                    No documents uploaded.
+                </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var document in documents)
+                    {
+                        <div class="col-md-4">
+                            <div class="border rounded p-3">
+                                <div class="fw-semibold mb-2">
+                                    @document.DocumentType
+                                </div>
+                                <a asp-controller="ApplicationManagement"
+                                   asp-action="Document"
+                                   asp-route-documentId="@document.Id"
+                                   target="_blank"class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-file-earmark me-1"></i>
+                                    View Document
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- APPROVAL ACTIONS -->
+    @if (Model.Status == "Submitted")
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="fw-bold mb-0">
+                    Application Decision
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-2">
+                    <form asp-action="Approve"method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden"name="id"value="@Model.Id" />
+                        <button type="submit"class="btn btn-success"onclick="return confirm('Approve this application?');">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Approve Application
+                        </button>
+                    </form>
+                    <form asp-action="Reject"method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden"name="id"value="@Model.Id" />
+                        <button type="submit"class="btn btn-danger"onclick="return confirm('Reject this application?');">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Reject Application
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- EXAM CENTER -->
+    @if (Model.Status == "Approved")
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="fw-bold mb-0">
+                    Exam Center & Hall Ticket
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrWhiteSpace(Model.HallTicketNumber))
+                {
+                    <div class="alert alert-success">
+                        <strong>Hall Ticket Generated</strong>
+                        <br />
+                        Hall Ticket Number:
+                        <strong>
+                            @Model.HallTicketNumber
+                        </strong>
+                    </div>
+                }
+
+                <form asp-action="AssignCenter"method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden"name="id"value="@Model.Id" />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Examination Center
+                            </label>
+                            <select name="centerId"class="form-select"required>
+                                <option value="">Select Exam Center</option>
+                                @foreach (var center in centers)
+                                {
+                                    <option value="@center.Id"selected="@(Model.ExamCenterId == center.Id)">
+                                        @center.CenterName -
+                                        @center.City
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Reporting Time
+                            </label>
+                            <input type="time"name="reportingTime"value="@Model.ExamReportingTime"
+                                   class="form-control"required />
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit"class="btn btn-primary w-100">
+                                <i class="bi bi-ticket-perforated me-1"></i>
+                                Generate
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                @if (!string.IsNullOrWhiteSpace(Model.HallTicketNumber))
+                {
+                    <div class="mt-3">
+                        <a asp-action="HallTicket"
+                           asp-route-id="@Model.Id"class="btn btn-outline-primary">
+                            <i class="bi bi-eye me-1"></i>
+                            View Hall Ticket
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

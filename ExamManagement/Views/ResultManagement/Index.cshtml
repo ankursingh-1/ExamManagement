@@ -1,0 +1,491 @@
+﻿@model ExamManagement.ViewModels.ResultManagementViewModel
+
+@{
+    ViewData["Title"] = "Result Management";
+
+    var categories = new[]
+    {
+        "General",
+        "OBC",
+        "SC",
+        "ST",
+        "EWS",
+        "PwD"
+    };
+}
+
+<div class="container-fluid py-4">
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"> Result Management </h2>
+            <p class="text-muted mb-0">
+                Manage examination results and cut-off
+            </p>
+        </div>
+        <a asp-controller="Admin"
+           asp-action="Index"class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- SUCCESS MESSAGE -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <!-- ERROR MESSAGE -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- EXAM FILTER -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="Index"method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Select Examination</label>
+                        <select name="examId"class="form-select"required>
+                            <option value=""> -- Select Exam -- </option>
+                            @foreach (var exam in Model.Exams)
+                            {
+                                @if (Model.SelectedExamId == exam.Id)
+                                {
+                                    <option value="@exam.Id" selected>@exam.ExamName</option>
+                                }
+                                else
+                                {
+                                    <option value="@exam.Id">@exam.ExamName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Category</label>
+                        <select name="category"class="form-select">
+                            @if (string.IsNullOrWhiteSpace(Model.SelectedCategory))
+                            {
+                                <option value="" selected>All Categories</option>
+                            }
+                            else
+                            {
+                                <option value="">All Categories</option>
+                            }
+                            @foreach (var category in categories)
+                            {
+                                @if (Model.SelectedCategory == category)
+                                {
+                                    <option value="@category" selected>@category</option>
+                                }
+                                else
+                                {
+                                    <option value="@category">@category</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit"class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i>
+                            Load Results
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.SelectedExam != null)
+    {
+        <!-- CUTOFF CONFIGURATION -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-sliders me-2"></i>
+                    Cut-off Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    @foreach (var category in categories)
+                    {
+                        var cutoff = Model.Cutoffs.FirstOrDefault(x => x.Category == category);
+                        <div class="col-md-6 col-xl-4">
+                            <div class="border rounded p-3 h-100">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold mb-0">@category</h6>
+                                    @if (cutoff != null && cutoff.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Not Configured</span>
+                                    }
+                                </div>
+
+                                <!-- SAVE CUTOFF -->
+                                <form asp-action="SaveCutoff"method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="examId" value="@Model.SelectedExamId" />
+                                    <input type="hidden"name="category"value="@category" />
+                                    <div class="mb-2">
+                                        <label class="form-label small">Cut-off Type</label>
+                                        <select name="cutoffType"class="form-select form-select-sm">
+                                            @if (cutoff != null && cutoff.CutoffType == "Percentile")
+                                            {
+                                                <option value="Percentage">Percentage</option>
+                                                <option value="Percentile" selected>Percentile</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="Percentage" selected>Percentage</option>
+                                                <option value="Percentile"> Percentile</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small">Cut-off Value</label>
+                                        <input type="number"name="cutoffValue"class="form-control form-control-sm"
+                                            min="0"max="100"step="0.01"value="@(cutoff?.CutoffValue ?? 0)"required />
+                                    </div>
+                                    <button type="submit"class="btn btn-sm btn-primary w-100">
+                                        <i class="bi bi-save me-1"></i>
+                                        Save Cut-off
+                                    </button>
+                                </form>
+
+                                <!-- DISABLE CUTOFF -->
+                                @if (cutoff != null && cutoff.IsActive)
+                                {
+                                    <form asp-action="DisableCutoff"method="post"class="mt-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden"name="id"value="@cutoff.Id" />
+                                        <input type="hidden" name="examId" value="@Model.SelectedExamId" />
+                                        <button type="submit"class="btn btn-sm btn-outline-danger w-100">
+                                            <i class="bi bi-x-circle me-1"></i>
+                                            Disable Cut-off
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- STUDENT RESULTS -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0 fw-bold">
+                            Student Results
+                        </h5>
+                        @if (Model.SelectedExam != null)
+                        {
+                            <small class="text-muted">@Model.SelectedExam.ExamName</small>
+                        }
+                    </div>
+                    <div class="d-flex gap-2">
+                        <!-- DOWNLOAD TEMPLATE -->
+                        <a asp-action="DownloadMarksTemplate"
+                           asp-route-examId="@Model.SelectedExamId"
+                           asp-route-category="@Model.SelectedCategory"class="btn btn-success">
+                            <i class="bi bi-file-earmark-excel me-1"></i>
+                            Download Excel Template
+                        </a>
+                        <!-- UPLOAD EXCEL -->
+                        <button type="button"class="btn btn-primary"data-bs-toggle="modal"
+                                data-bs-target="#uploadMarksModal">
+                            <i class="bi bi-upload me-1"></i>
+                            Upload Marks Excel
+                        </button>
+                        <span class="badge bg-primary d-flex align-items-center">
+                            @Model.Applications.Count Applications
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (!Model.Applications.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-people fs-1 text-muted"></i>
+                        <h5 class="mt-3">No approved applications found</h5>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Application
+                                    </th>
+                                    <th>
+                                        Student
+                                    </th>
+                                    <th>
+                                        Category
+                                    </th>
+                                    <th>
+                                        Total
+                                    </th>
+                                    <th>
+                                        Obtained
+                                    </th>
+                                    <th>
+                                        Percentage
+                                    </th>
+                                    <th>
+                                        Required Cut-off
+                                    </th>
+                                    <th>
+                                        Qualification
+                                    </th>
+                                    <th>
+                                        Status
+                                    </th>
+                                    <th>
+                                        Result
+                                    </th>
+                                    <th>
+                                        Subject
+                                    </th>
+                                    <th>
+                                        Publish
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var application in Model.Applications)
+                                {
+                                    var result = Model.Results.FirstOrDefault(x => x.StudentApplicationId == application.Id);
+                                    var studentCategory = string.IsNullOrWhiteSpace(application.Category)
+                                    ? "General"
+                                    : application.Category;
+
+                                    var studentCutoff = Model.Cutoffs.FirstOrDefault(x => x.Category == studentCategory && x.IsActive);
+
+                                    <tr>
+                                        <!-- APPLICATION -->
+                                        <td>
+                                            <span class="fw-semibold">
+                                                @application.ApplicationNumber
+                                            </span>
+                                        </td>
+
+                                        <!-- STUDENT -->
+                                        <td>
+                                            @application.FullName
+                                        </td>
+
+                                        <!-- CATEGORY -->
+                                        <td>
+                                            <span class="badge bg-light text-dark border">
+                                                @studentCategory
+                                            </span>
+                                        </td>
+
+                                        <!-- TOTAL -->
+                                        <td>
+                                            @if (result != null)
+                                            {
+                                                @result.TotalMarks
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted"> - </span>
+                                            }
+                                        </td>
+
+                                        <!-- OBTAINED -->
+                                        <td>
+                                            @if (result != null)
+                                            {
+                                                @result.ObtainedMarks
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted"> - </span>
+                                            }
+                                        </td>
+
+                                        <!-- PERCENTAGE -->
+                                        <td>
+                                            @if (result != null)
+                                            {
+                                                <strong>@result.Percentage%</strong>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted"> - </span>
+                                            }
+                                        </td>
+
+                                        <!-- CUTOFF -->
+                                        <td>
+                                            @if (studentCutoff != null)
+                                            {
+                                                <strong>@studentCutoff.CutoffValue%</strong>
+                                                <small class="d-block text-muted">@studentCutoff.CutoffType</small>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Not Configured</span>
+                                            }
+                                        </td>
+
+                                        <!-- QUALIFICATION -->
+                                        <td>
+
+                                            @if (result?.CutoffStatus == "Qualified")
+                                            {
+                                                <span class="badge bg-success">
+                                                    Qualified
+                                                </span>
+                                            }
+                                            else if (result?.CutoffStatus == "Not Qualified")
+                                            {
+                                                <span class="badge bg-danger">Not Qualified</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Pending</span>
+                                            }
+                                        </td>
+
+                                        <!-- STATUS -->
+                                        <td>
+                                            @if (result?.IsPublished == true)
+                                            {
+                                                <span class="badge bg-success">Published</span>
+                                            }
+                                            else if (result != null)
+                                            {
+                                                <span class="badge bg-warning text-dark">Draft</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted"> - </span>
+                                            }
+                                        </td>
+
+                                        <!-- RESULT FORM -->
+                                        <td>
+                                            <form asp-action="SaveResult"method="post">@Html.AntiForgeryToken()
+                                                <input type="hidden"name="applicationId"value="@application.Id" />
+                                                <div class="mb-1">
+                                                    <input type="number"name="totalMarks"class="form-control form-control-sm"placeholder="Total"
+                                                           min="1"step="0.01"value="@(result?.TotalMarks ?? 100)"required />
+                                                </div>
+                                                <div class="mb-1">
+                                                    <input type="number"name="obtainedMarks"class="form-control form-control-sm"placeholder="Obtained"
+                                                           min="0"step="0.01"value="@(result?.ObtainedMarks ?? 0)"required />
+                                                </div>
+                                                <button type="submit"class="btn btn-sm btn-primary w-100">
+                                                    <i class="bi bi-save me-1"></i>
+                                                    Save
+                                                </button>
+                                            </form>
+                                        </td>
+
+                                        <!-- SUBJECT FORM -->
+                                        <td>
+                                            <form asp-action="SaveSubjectResult"method="post">@Html.AntiForgeryToken()
+                                                <input type="hidden"name="applicationId"value="@application.Id" />
+                                                <input type="text"name="subjectName"class="form-control form-control-sm mb-1"
+                                                       placeholder="Subject"maxlength="100"required />
+                                                <input type="number"name="totalMarks"class="form-control form-control-sm mb-1"
+                                                       placeholder="Total"min="1"step="0.01"required />
+                                                <input type="number"name="obtainedMarks"class="form-control form-control-sm mb-1"
+                                                       placeholder="Obtained"min="0"tep="0.01"required />
+                                                <button type="submit"class="btn btn-sm btn-outline-primary w-100">
+                                                    <i class="bi bi-list-ol me-1"></i>
+                                                    Save Subject
+                                                </button>
+                                            </form>
+                                        </td>
+
+                                        <!-- PUBLISH -->
+                                        <td>
+                                            @if (result != null && !result.IsPublished && result.CutoffStatus != "Pending")
+                                            {
+                                                <form asp-action="PublishResult"method="post">@Html.AntiForgeryToken()
+                                                    <input type="hidden"name="resultId"value="@result.Id" />
+                                                    <button type="submit"class="btn btn-sm btn-success">
+                                                        <i class="bi bi-send me-1"></i>
+                                                        Publish
+                                                    </button>
+                                                </form>
+                                            }
+                                            else if (result?.IsPublished == true)
+                                            {
+                                                <span class="badge bg-success">Published</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Pending</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- UPLOAD MARKS EXCEL MODAL -->
+<div class="modal fade"id="uploadMarksModal"tabindex="-1"aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-file-earmark-excel me-2"></i>
+                    Upload Marks Excel
+                </h5>
+                <button type="button"class="btn-close"data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="UploadMarksExcel"method="post"enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="examId" value="@Model.SelectedExamId" />
+                    <input type="hidden"name="category"value="@Model.SelectedCategory" />
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        First download the Excel template,
+                        enter Total Marks and Obtained Marks,
+                        then upload the completed file.
+                    </div>
+                    <label class="form-label fw-semibold">Select Excel File</label>
+                    <input type="file"name="excelFile"class="form-control"accept=".xlsx"required />
+                    <div class="form-text">Only .xlsx files are supported.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"class="btn btn-secondary"data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit"class="btn btn-primary">
+                        <i class="bi bi-upload me-1"></i>
+                        Upload & Save Results
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

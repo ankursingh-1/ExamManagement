@@ -1,17 +1,340 @@
-﻿@{
+﻿@model IEnumerable<ExamManagement.Models.Exam>
+
+@{
     ViewData["Title"] = "Student Dashboard";
+
+    var applications =
+        ViewBag.Applications
+        as List<ExamManagement.Models.StudentApplication>
+        ?? new List<ExamManagement.Models.StudentApplication>();
 }
 
-<div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h2 class="mb-3">Student Dashboard</h2>
-            <p class="text-muted">
-                Welcome to the Examination Management System.
-            </p>
-            <div class="alert alert-success">
-                Student authentication is working successfully.
+<div class="container-fluid py-4">
+
+    <!-- PAGE HEADER -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Student Dashboard</h2>
+        <p class="text-muted mb-0">Welcome to the Examination Management System.</p>
+    </div>
+    <!-- SUCCESS MESSAGE -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm"role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button"class="btn-close"data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- ERROR MESSAGE -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm"role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button"class="btn-close"data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- AVAILABLE EXAMINATIONS -->
+    <div class="card shadow-sm border-0">
+        <!-- CARD HEADER -->
+        <div class="card-header bg-primary text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1 fw-bold">
+                        <i class="bi bi-mortarboard-fill me-2"></i>
+                        Available Examinations
+                    </h5>
+                    <small class="opacity-75">View examination details and manage your application.</small>
+                </div>
+                <span class="badge bg-light text-primary px-3 py-2">@Model.Count() Exams</span>
             </div>
+        </div>
+
+        <!-- CARD BODY -->
+        <div class="card-body p-4">
+            @if (!Model.Any())
+            {
+                <!-- NO EXAM -->
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="bi bi-calendar-x display-4 text-muted"></i>
+                    </div>
+                    <h5 class="fw-bold">No examinations available</h5>
+                    <p class="text-muted mb-0">
+                        There are currently no active examinations
+                        accepting applications.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="row g-4">
+                    @foreach (var exam in Model)
+                    {
+                        var application = applications.FirstOrDefault(x =>
+                        x.ExamId == exam.Id);
+                        var alreadyApplied = application != null;
+                        var isSubmitted = application?.Status == "Submitted";
+                        var isApproved = application?.Status == "Approved";
+                        <div class="col-xl-6 col-lg-6 col-md-12">
+                            <!-- EXAM CARD -->
+                            <div class="card h-100 border-0 shadow-sm exam-card">
+                                <div class="card-body p-4">
+                                    <!-- TOP SECTION -->
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="pe-3">
+                                            <!-- EXAM TYPE -->
+                                            <span class="badge bg-primary-subtle text-primary px-3 py-2 mb-2">
+                                                <i class="bi bi-bookmark-fill me-1"></i>
+                                                @exam.ExamType
+                                            </span>
+                                            <!-- EXAM NAME -->
+                                            <h5 class="fw-bold mb-1">@exam.ExamName</h5>
+                                            <!-- EXAM CODE -->
+                                            <div class="text-muted small">
+                                                <i class="bi bi-hash me-1"></i>
+                                                Exam Code:
+                                                <strong>@exam.ExamCode</strong>
+                                            </div>
+                                        </div>
+                                        <!-- STATUS -->
+                                        <div class="text-end">
+                                            @if (isApproved)
+                                            {
+                                                <span class="badge bg-success px-3 py-2">
+                                                    <i class="bi bi-patch-check-fill me-1"></i>
+                                                    Approved
+                                                </span>
+                                            }
+                                            else if (isSubmitted)
+                                            {
+                                                <span class="badge bg-info text-dark px-3 py-2">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                                    Submitted
+                                                </span>
+                                            }
+                                            else if (alreadyApplied)
+                                            {
+                                                <span class="badge bg-warning text-dark px-3 py-2">
+                                                    <i class="bi bi-clock-fill me-1"></i>
+                                                    In Progress
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary px-3 py-2">
+                                                    <i class="bi bi-unlock-fill me-1"></i>
+                                                    Applications Open
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <hr class="my-3" />
+                                    <!-- EXAM INFORMATION -->
+                                    <div class="row g-3 mb-4">
+                                        <!-- EXAM DATE -->
+                                        <div class="col-md-6">
+                                            <div class="border rounded-3 p-3 h-100 bg-light">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-primary text-white rounded-circle p-2 me-3">
+                                                        <i class="bi bi-calendar-event"></i>
+                                                    </div>
+                                                    <div>
+                                                        <small class="text-muted d-block">Examination Date</small>
+                                                        <strong>@exam.ExamDate.ToString("dd MMM yyyy")</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- LAST DATE -->
+                                        <div class="col-md-6">
+                                            <div class="border rounded-3 p-3 h-100 bg-light">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-warning text-dark rounded-circle p-2 me-3">
+                                                        <i class="bi bi-calendar-check"></i>
+                                                    </div>
+                                                    <div>
+                                                        <small class="text-muted d-block">
+                                                            Application Last Date
+                                                        </small>
+                                                        <strong>
+                                                            @exam.ApplicationEndDate.ToString("dd MMM yyyy")
+                                                        </strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- APPLICATION FEE -->
+                                        <div class="col-md-6">
+                                            <div class="border rounded-3 p-3 h-100 bg-light">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-success text-white rounded-circle p-2 me-3">
+                                                        <i class="bi bi-currency-rupee"></i>
+                                                    </div>
+                                                    <div>
+                                                        <small class="text-muted d-block">Application Fee</small>
+                                                        <strong>
+                                                            ₹@exam.ApplicationFee.ToString("N2")
+                                                        </strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- APPLICATION NUMBER -->
+                                        <div class="col-md-6">
+                                            <div class="border rounded-3 p-3 h-100 bg-light">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-secondary text-white rounded-circle p-2 me-3">
+                                                        <i class="bi bi-file-earmark-text"></i>
+                                                    </div>
+                                                    <div>
+                                                        <small class="text-muted d-block">Application Number</small>
+                                                        @if (application != null)
+                                                        {
+                                                            <strong>@application.ApplicationNumber</strong>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Not Applied</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- APPLICATION STATUS -->
+                                    @if (alreadyApplied)
+                                    {
+                                        <div class="border rounded-3 p-3 mb-4">
+                                            <div class="d-flex align-items-center">
+                                                @if (isApproved)
+                                                {
+                                                    <div class="bg-success-subtle text-success rounded-circle p-2 me-3">
+                                                        <i class="bi bi-check-circle-fill"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold text-success">
+                                                            Application Approved
+                                                        </div>
+                                                        <small class="text-muted">
+                                                            Your application has been approved.
+                                                            Hall Ticket is available.
+                                                        </small>
+                                                    </div>
+                                                }
+                                                else if (isSubmitted)
+                                                {
+                                                    <div class="bg-info-subtle text-info rounded-circle p-2 me-3">
+                                                        <i class="bi bi-send-check-fill"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold text-info">
+                                                            Application Submitted
+                                                        </div>
+                                                        <small class="text-muted">
+                                                            Your application is under review.
+                                                        </small>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-warning-subtle text-warning rounded-circle p-2 me-3">
+                                                        <i class="bi bi-hourglass-split"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold text-warning">
+                                                            Application In Progress
+                                                        </div>
+                                                        <small class="text-muted">
+                                                            Please complete the remaining application steps.
+                                                        </small>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- ACTION BUTTON -->
+                                    <div class="d-grid">
+                                        @if (isApproved)
+                                        {
+                                            <!-- HALL TICKET -->
+                                            <a asp-controller="StudentApplication"
+                                               asp-action="HallTicket"
+                                               asp-route-applicationId="@application!.Id"class="btn btn-success btn-lg">
+                                                <i class="bi bi-ticket-perforated-fill me-2"></i>
+                                                Download Hall Ticket
+                                                <i class="bi bi-arrow-right ms-2"></i>
+                                            </a>
+
+                                            <!-- VIEW RESULT -->
+                                            @if (ViewBag.PublishedResultApplicationIds != null &&
+                                                ((List<int>)ViewBag.PublishedResultApplicationIds)
+                                                .Contains(application!.Id))
+                                            {
+                                                <a asp-controller="StudentResult"
+                                                   asp-action="Index"
+                                                   asp-route-applicationId="@application!.Id"class="btn btn-outline-success btn-lg mt-2">
+                                                    <i class="bi bi-bar-chart-line-fill me-2"></i>
+                                                    View Result
+                                                    <i class="bi bi-arrow-right ms-2"></i>
+                                                </a>
+                                            }
+                                        }
+                                        else if (isSubmitted)
+                                        {
+                                            <!-- VIEW APPLICATION -->
+                                            <a asp-controller="StudentApplication"
+                                               asp-action="ApplicationDetails"
+                                               asp-route-applicationId="@application!.Id"class="btn btn-info btn-lg text-white">
+                                                <i class="bi bi-eye-fill me-2"></i>
+                                                View Application
+                                                <i class="bi bi-arrow-right ms-2"></i>
+                                            </a>
+                                        }
+                                        else if (alreadyApplied)
+                                        {
+                                            <!-- CONTINUE -->
+                                            <a asp-controller="StudentApplication"
+                                               asp-action="Create"
+                                               asp-route-examId="@exam.Id"class="btn btn-outline-primary btn-lg">
+                                                <i class="bi bi-arrow-right-circle-fill me-2"></i>
+                                                Continue Application
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <!-- APPLY -->
+                                            <a asp-controller="StudentApplication"
+                                               asp-action="Create"
+                                               asp-route-examId="@exam.Id"class="btn btn-primary btn-lg">
+                                                <i class="bi bi-file-earmark-person-fill me-2"></i>
+                                                Apply Now
+                                                <i class="bi bi-arrow-right ms-2"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <style>
+        .exam-card {
+            transition: all 0.2s ease-in-out;
+        }
+            .exam-card:hover {
+                transform: translateY(-3px);
+            }
+    </style>
+}

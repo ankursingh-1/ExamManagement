@@ -13,11 +13,8 @@ namespace ExamManagement.Controllers
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ApplicationDbContext _context;
-
-        public AccountController(
-            SignInManager<IdentityUser> signInManager,
-            UserManager<IdentityUser> userManager,
-            ApplicationDbContext context)
+        public AccountController(SignInManager<IdentityUser> signInManager,
+            UserManager<IdentityUser> userManager,ApplicationDbContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -27,7 +24,7 @@ namespace ExamManagement.Controllers
         // LOGIN - GET
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login(string? returnUrl = null,int? examId = null)
+        public IActionResult Login(string? returnUrl = null, int? examId = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (examId.HasValue)
@@ -42,7 +39,7 @@ namespace ExamManagement.Controllers
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model,
-            string? returnUrl = null,int? examId = null)
+            string? returnUrl = null, int? examId = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid)
@@ -50,36 +47,38 @@ namespace ExamManagement.Controllers
                 ViewBag.ExamId = examId;
                 return View(model);
             }
-
             var user = await _userManager.FindByEmailAsync(model.Email);
-
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty,"Invalid email or password.");
+                ModelState.AddModelError(string.Empty, "Invalid email or password.");
                 ViewBag.ExamId = examId;
                 return View(model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user.UserName!,model.Password,
-                model.RememberMe,lockoutOnFailure: true);
+            var result = await _signInManager.PasswordSignInAsync(user.UserName!, model.Password,
+                model.RememberMe, lockoutOnFailure: true);
             if (result.Succeeded)
             {
                 var roles = await _userManager.GetRolesAsync(user);
                 if (roles.Contains("Admin"))
                 {
-                    return RedirectToAction("Index","Admin");
+                    return RedirectToAction("Index", "Admin");
                 }
 
                 if (roles.Contains("Student"))
                 {
+                    if (examId.HasValue)
+                    {
+                        return RedirectToAction("Create","StudentApplication",
+                            new { examId = examId.Value });
+                    }
                     return RedirectToAction("Index","Student");
                 }
-
                 await _signInManager.SignOutAsync();
-                ModelState.AddModelError(string.Empty,"No valid role assigned to this account.");
+                ModelState.AddModelError(string.Empty, "No valid role assigned to this account.");
                 return View(model);
             }
-            ModelState.AddModelError(string.Empty,"Invalid email or password.");
+            ModelState.AddModelError(string.Empty, "Invalid email or password.");
             ViewBag.ExamId = examId;
             return View(model);
         }
@@ -106,7 +105,7 @@ namespace ExamManagement.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model,int examId)
+        public async Task<IActionResult> Register(RegisterViewModel model, int examId)
         {
             // Check selected exam
             var exam = await _context.Exams
@@ -132,7 +131,7 @@ namespace ExamManagement.Controllers
 
             if (existingUser != null)
             {
-                ModelState.AddModelError("Email","An account with this email address already exists.");
+                ModelState.AddModelError("Email", "An account with this email address already exists.");
                 ViewBag.ExamId = examId;
                 ViewBag.ExamName = exam.ExamName;
                 return View(model);
@@ -147,14 +146,14 @@ namespace ExamManagement.Controllers
                 EmailConfirmed = true
             };
 
-            var result = await _userManager.CreateAsync(user,model.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);
 
             // Identity creation failed
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError(string.Empty,error.Description);
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
                 ViewBag.ExamId = examId;
                 ViewBag.ExamName = exam.ExamName;
@@ -162,11 +161,10 @@ namespace ExamManagement.Controllers
             }
 
             // Assign Student role
-            var roleExists = await _userManager.IsInRoleAsync(user,"Student");
-
+            var roleExists = await _userManager.IsInRoleAsync(user, "Student");
             if (!roleExists)
             {
-                await _userManager.AddToRoleAsync(user,"Student");
+                await _userManager.AddToRoleAsync(user, "Student");
             }
 
             // Create Student Profile
@@ -177,15 +175,16 @@ namespace ExamManagement.Controllers
                 Mobile = model.Mobile,
                 CreatedAt = DateTime.Now
             };
-
             _context.StudentProfiles.Add(studentProfile);
             await _context.SaveChangesAsync();
 
             // Automatically login student
-            await _signInManager.SignInAsync(user,isPersistent: false);
+            await _signInManager.SignInAsync(user, isPersistent: false);
 
             // For now go to Student Dashboard
-            return RedirectToAction("Index","Student");
+            //return RedirectToAction("Index","Student");
+            // Continue to Student Application - Phase 1
+            return RedirectToAction("Create","StudentApplication",new { examId = examId });
         }
 
         // LOGOUT
@@ -194,7 +193,7 @@ namespace ExamManagement.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login","Account");
+            return RedirectToAction("Login", "Account");
         }
 
         // ACCESS DENIED

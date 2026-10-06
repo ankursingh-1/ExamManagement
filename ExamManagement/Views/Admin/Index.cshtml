@@ -68,9 +68,31 @@
                     <p class="text-muted">
                         Manage institute name, logo, address and contact details.
                     </p>
-                    <a asp-controller="Settings" asp-action="Institute"
-                       class="btn btn-outline-primary">
-                        <i class="bi bi-gear me-1"></i>Institute Settings
+                    <a asp-controller="InstituteSettings"
+                       asp-action="Index"class="btn btn-primary">
+                        <i class="bi bi-gear me-1"></i>
+                        Institute Settings
+                    </a>
+                </div>
+            </div>
+        </div>       
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-building fs-1 text-primary"></i>
+                    </div>
+                    <h5 class="fw-bold">
+                        Exam Centers
+                    </h5>
+                    <p class="text-muted">
+                        Manage examination centers and capacity.
+                    </p>
+                    <a asp-controller="ExamCenter"
+                       asp-action="Index"class="btn btn-primary">
+                        <i class="bi bi-building me-2"></i>
+                        Manage Centers
                     </a>
                 </div>
             </div>
@@ -80,18 +102,70 @@
         <div class="col-xl-4 col-md-6">
             <div class="card dashboard-card shadow-sm h-100">
                 <div class="card-body p-4">
-                    <div class="dashboard-icon mb-3">
-                        <i class="bi bi-people"></i>
+                    <div class="mb-3">
+                        <i class="bi bi-file-earmark-check fs-1 text-primary"></i>
                     </div>
                     <h5 class="fw-bold">Applications</h5>
-                    <p class="text-muted">
-                        View and manage student examination applications.
-                    </p>
-                    <button type="button" class="btn btn-outline-secondary" disabled>
-                        <i class="bi bi-clock me-1"></i>Coming Soon
-                    </button>
+                    <p class="text-muted">Review, approve and assign exam centers.</p>
+                    <a asp-controller="AdminApplication"
+                       asp-action="Index"class="btn btn-primary">
+                        <i class="bi bi-file-earmark-check me-2"></i>
+                        Manage Applications
+                    </a>
                 </div>
             </div>
         </div>
+
+        <!-- Results -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="dashboard-icon mb-3">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h5 class="fw-bold">Result Management</h5>
+                    <p class="text-muted">
+                        View and manage student examination results.
+                    </p>
+                    <a asp-controller="ResultManagement"
+                       asp-action="Index" class="btn btn-primary">
+                        <i class="bi bi-bar-chart-line me-1"></i>
+                        Result Manage
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Reports -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="dashboard-icon mb-3">
+                        <i class="bi bi-bar-chart-line"></i>
+                    </div>
+                    <h5 class="fw-bold">Result Reports</h5>
+                    <p class="text-muted">
+                        View examination results, qualified students and result statistics.
+                    </p>
+                    <a asp-controller="ResultReports"
+                       asp-action="Index"class="btn btn-primary">
+                        <i class="bi bi-bar-chart-line me-1"></i>
+                        Result Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @* <a asp-controller="ResultManagement"
+           asp-action="Index"class="btn btn-outline-success">
+            <i class="bi bi-bar-chart-line me-1"></i>
+            Result Management
+        </a> *@
+
+        <a asp-controller="ApplicationManagement"
+           asp-action="Index"class="btn btn-primary">
+            <i class="bi bi-file-earmark-text me-1"></i>
+            Application Management
+        </a>
     </div>
 </div>

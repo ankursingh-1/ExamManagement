@@ -1,0 +1,269 @@
+﻿@model ExamManagement.Models.StudentApplication
+
+@{
+    ViewData["Title"] = "Review Application";
+    var payment = ViewBag.Payment as ExamManagement.Models.StudentApplicationPayment;
+    var documents = ViewBag.Documents as List<ExamManagement.Models.StudentApplicationDocument>;
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Review Application</h2>
+        <p class="text-muted mb-0">@ViewBag.ExamName</p>
+    </div>
+    <div class="alert alert-info">
+        Please review all your details carefully before final submission.
+    </div>
+    <!-- Application Information -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0 fw-bold">Application Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <small class="text-muted">Application Number</small>
+                    <div class="fw-semibold">@Model.ApplicationNumber</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">Exam</small>
+                    <div class="fw-semibold">@ViewBag.ExamName</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">Status</small>
+                    <div>
+                        <span class="badge bg-warning text-dark">@Model.Status</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Basic Details -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Basic Details</h5>
+            <a asp-action="Edit"
+               asp-route-applicationId="@Model.Id"class="btn btn-outline-primary">
+                <i class="bi bi-pencil me-1"></i>
+                Edit
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <small class="text-muted">Full Name</small>
+                    <div class="fw-semibold">@Model.FullName</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted">Email</small>
+                    <div>@Model.Email</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted">Mobile</small>
+                    <div>@Model.Mobile</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted">Date of Birth</small>
+                    <div>
+                        @Model.DateOfBirth?.ToString("dd-MM-yyyy")
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted">Gender</small>
+                    <div>@Model.Gender</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted">Father Name</small>
+                    <div>@Model.FatherName</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted">Mother Name</small>
+                    <div>@Model.MotherName</div>
+                </div>
+
+                <div class="col-12">
+                    <small class="text-muted">Address</small>
+                    <div>@Model.Address</div>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">City</small>
+                    <div>@Model.City</div>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">State</small>
+                    <div>@Model.State</div>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">PIN Code</small>
+                    <div>@Model.Pincode</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted">Aadhaar Number</small>
+                    <div>@Model.AadhaarNumber</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Qualification -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Qualification</h5>
+            <a asp-action="Qualification"
+               asp-route-applicationId="@Model.Id"class="btn btn-outline-primary">
+                <i class="bi bi-pencil me-1"></i>
+                Edit
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <small class="text-muted">10th Qualification</small>
+                    <div>@(Model.Has10thQualification ? "Yes" : "No")</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">10th Percentage</small>
+                    <div>@Model.TenthPercentage</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">12th Status</small>
+                    <div>@Model.TwelfthStatus</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">12th Percentage</small>
+                    <div>@Model.TwelfthPercentage</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">12th Board</small>
+                    <div>@Model.TwelfthBoard</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">12th Passing Year</small>
+                    <div>@Model.TwelfthPassingYear</div>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">Physics</small>
+                    <div>@(Model.HasPhysics ? "Yes" : "No")</div>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">Chemistry</small>
+                    <div>@(Model.HasChemistry ? "Yes" : "No")</div>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">Biology</small>
+                    <div>@(Model.HasBiology ? "Yes" : "No")</div>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">Mathematics</small>
+                    <div>@(Model.HasMathematics ? "Yes" : "No")</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">Graduation</small>
+                    <div>@(Model.HasGraduation ? "Yes" : "No")</div>
+                </div>
+                @if (Model.HasGraduation)
+                {
+                    <div class="col-md-6">
+                        <small class="text-muted">Graduation Course</small>
+                        <div>@Model.GraduationCourse</div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Graduation Percentage</small>
+                        <div>@Model.GraduationPercentage</div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Graduation Passing Year</small>
+                        <div>@Model.GraduationPassingYear</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Documents</h5>
+            <a asp-action="Documents"
+               asp-route-applicationId="@Model.Id"class="btn btn-outline-primary">
+                <i class="bi bi-pencil me-1"></i>
+                Edit
+            </a>
+        </div>
+        <div class="card-body">
+            @if (documents != null && documents.Any())
+            {
+                <div class="list-group">
+                    @foreach (var document in documents)
+                    {
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@document.DocumentType</span>
+                            <span class="text-success">✓ Uploaded</span>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-danger">No documents found.</div>
+            }
+        </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0 fw-bold">Payment</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <small class="text-muted">Application Fee</small>
+                    <div class="fs-5 fw-bold">
+                        ₹@Convert.ToDecimal(ViewBag.ApplicationFee).ToString("0.00")
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">Payment Status</small>
+                    <div>
+                        <span class="badge bg-success">Paid</span>
+                    </div>
+                </div>
+                @if (payment != null)
+                {
+                    <div class="col-md-6">
+                        <small class="text-muted">Payment ID</small>
+                        <div class="fw-semibold">@payment.PaymentId</div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Paid On</small>
+                        <div>@payment.PaidAt?.ToLocalTime().ToString("dd-MM-yyyy hh:mm tt")</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between">
+        <a asp-action="Payment"asp-route-applicationId="@Model.Id"
+           class="btn btn-outline-secondary">
+            Back to Payment
+        </a>
+        <a asp-action="Submit"asp-route-applicationId="@Model.Id"
+           class="btn btn-success px-4">
+            Continue to Final Submit
+        </a>
+    </div>
+</div>

@@ -48,6 +48,9 @@ namespace ExamManagement.Models
         [StringLength(20)]
         public string? Gender { get; set; }
 
+        [StringLength(30)]
+        public string? Category { get; set; }
+
         [StringLength(500)]
         public string? Address { get; set; }
 
@@ -98,9 +101,30 @@ namespace ExamManagement.Models
 
         public int? GraduationPassingYear { get; set; }
 
+        [Required(ErrorMessage = "Aadhaar number is required.")]
+        [RegularExpression(@"^\d{12}$",ErrorMessage = "Aadhaar number must be exactly 12 digits.")]
+        [Display(Name = "Aadhaar Number")]
+        public string AadhaarNumber { get; set; } = string.Empty;
+
         // Application timestamps
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
+
+        // Application Verification
+
+        [StringLength(500)]
+        public string? RejectionReason { get; set; }
+
+        // Exam Center Assignment
+        public int? ExamCenterId { get; set; }
+
+        public DateTime? ApprovedAt { get; set; }
+
+        public DateTime? ExamReportingTime { get; set; }
+
+        // Hall Ticket
+        [StringLength(50)]
+        public string? HallTicketNumber { get; set; }
     }
 }

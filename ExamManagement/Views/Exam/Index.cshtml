@@ -10,15 +10,19 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="mb-1">Exam Management</h2>
-            <p class="text-muted mb-0">
-                Create and manage examinations.
-            </p>
+            <p class="text-muted mb-0">Create and manage examinations.</p>
         </div>
-
+        <div>
+        <a asp-controller="Admin"
+           asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Dashboard
+        </a>
         <a asp-action="Create" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i>
             Create Exam
         </a>
+        </div>
     </div>
 
     <!-- Success Message -->
@@ -108,31 +112,38 @@
                             @foreach (var exam in Model)
                             {
                                 <tr>
+
                                     <!-- Exam Name -->
                                     <td class="px-3">
                                         <div class="fw-semibold">@exam.ExamName</div>
                                     </td>
+
                                     <!-- Code -->
                                     <td class="text-center">
                                         <span class="badge bg-light text-dark border">@exam.ExamCode</span>
                                     </td>
+
                                     <!-- Type -->
                                     <td class="text-center">@exam.ExamType</td>
+
                                     <!-- Application Period -->
                                     <td class="text-center text-nowrap">
                                         <div>@exam.ApplicationStartDate.ToString("dd MMM yyyy")</div>
                                         <small class="text-muted">to</small>
                                         <div>@exam.ApplicationEndDate.ToString("dd MMM yyyy")</div>
                                     </td>
+
                                     <!-- Exam Date -->
                                     <td class="text-center text-nowrap">
                                         <i class="bi bi-calendar-event me-1 text-muted"></i>
                                         @exam.ExamDate.ToString("dd MMM yyyy")
                                     </td>
+
                                     <!-- Fee -->
                                     <td class="text-center text-nowrap fw-semibold">
                                         ₹@exam.ApplicationFee.ToString("N2")
                                     </td>
+
                                     <!-- Status -->
                                     <td class="text-center">
                                         @if (exam.IsActive)
@@ -150,21 +161,25 @@
                                             </span>
                                         }
                                     </td>
+
                                     <!-- Actions -->
                                     <td class="px-3">
                                         <div class="d-flex justify-content-center align-items-center gap-1 flex-wrap">
+                                            
                                             <!-- Details -->
                                             <a asp-action="Details"
                                                asp-route-id="@exam.Id"class="btn btn-sm btn-outline-info"title="View Details">
                                                 <i class="bi bi-eye me-1"></i>
                                                 Details
                                             </a>
+                                           
                                             <!-- Edit -->
                                             <a asp-action="Edit"
                                                asp-route-id="@exam.Id"class="btn btn-sm btn-outline-primary"title="Edit Exam">
                                                 <i class="bi bi-pencil me-1"></i>
                                                 Edit
                                             </a>
+
                                             <!-- Apply Link -->
                                             @if (exam.IsActive)
                                             {
@@ -176,6 +191,7 @@
                                                     Apply
                                                 </a>
                                             }
+
                                             <!-- Activate / Deactivate -->
                                             <form asp-action="ToggleStatus"
                                                   asp-route-id="@exam.Id"method="post"class="d-inline">
@@ -195,6 +211,7 @@
                                                     </button>
                                                 }
                                             </form>
+
                                             <!-- Delete -->
                                             @{
                                                 var canDelete = exam.ApplicationEndDate.Date < DateTime.Today

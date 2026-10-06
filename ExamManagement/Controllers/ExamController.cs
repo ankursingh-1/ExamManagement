@@ -304,5 +304,23 @@ namespace ExamManagement.Controllers
             TempData["SuccessMessage"] = "Examination deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+        public IActionResult StartApplication(int id)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                if (User.IsInRole("Student"))
+                {
+                    return RedirectToAction("Create","StudentApplication",new { examId = id });
+                }
+                return RedirectToAction("AccessDenied","Account");
+            }
+            return RedirectToAction("Login","Account",new
+                {
+                    examId = id,
+                    returnUrl = Url.Action("Create","StudentApplication",new { examId = id })
+                });
+        }
     }
 }

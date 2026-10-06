@@ -8,8 +8,7 @@ namespace ExamManagement.Data
     public class ApplicationDbContext
         : IdentityDbContext<IdentityUser, IdentityRole, string>
     {
-        public ApplicationDbContext(
-            DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
@@ -24,6 +23,34 @@ namespace ExamManagement.Data
             builder.Entity<ExamEligibility>()
                 .Property(x => x.MinimumPercentage)
                 .HasPrecision(5, 2);
+
+            builder.Entity<ExamCutoff>()
+                .Property(x => x.CutoffValue)
+                .HasPrecision(5, 2);
+
+            builder.Entity<ExamResult>()
+                .Property(x => x.TotalMarks)
+                .HasPrecision(10, 2);
+
+            builder.Entity<ExamResult>()
+                .Property(x => x.ObtainedMarks)
+                .HasPrecision(10, 2);
+
+            builder.Entity<ExamResult>()
+                .Property(x => x.Percentage)
+                .HasPrecision(5, 2);
+
+            builder.Entity<ExamResultSubject>()
+               .Property(x => x.TotalMarks)
+               .HasPrecision(10, 2);
+
+            builder.Entity<ExamResultSubject>()
+                .Property(x => x.ObtainedMarks)
+                .HasPrecision(10, 2);
+
+            builder.Entity<ExamResultSubject>()
+                .Property(x => x.Percentage)
+                .HasPrecision(5, 2);
         }
 
         public DbSet<InstituteSetting> InstituteSettings { get; set; }
@@ -31,5 +58,11 @@ namespace ExamManagement.Data
         public DbSet<ExamEligibility> ExamEligibilities { get; set; }
         public DbSet<StudentProfile> StudentProfiles { get; set; }
         public DbSet<StudentApplication> StudentApplications { get; set; }
+        public DbSet<StudentApplicationDocument> StudentApplicationDocuments { get; set; }
+        public DbSet<StudentApplicationPayment> StudentApplicationPayments { get; set; }
+        public DbSet<ExamCenter> ExamCenters { get; set; }
+        public DbSet<ExamCutoff> ExamCutoffs { get; set; }
+        public DbSet<ExamResult> ExamResults { get; set; }
+        public DbSet<ExamResultSubject> ExamResultSubjects { get; set; }
     }
 }

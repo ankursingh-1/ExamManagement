@@ -4,8 +4,7 @@ namespace ExamManagement.Data
 {
     public static class DbInitializer
     {
-        public static async Task InitializeAsync(
-            IServiceProvider serviceProvider)
+        public static async Task InitializeAsync(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
@@ -26,7 +25,6 @@ namespace ExamManagement.Data
 
             const string adminEmail = "admin@exam.com";
             const string adminPassword = "Admin@123";
-
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
             if (adminUser == null)

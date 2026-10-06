@@ -4,213 +4,363 @@
     ViewData["Title"] = "Apply - " + Model.ExamName;
 }
 
-<div class="container py-5">
-    <!-- Exam Header -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="badge bg-primary mb-2">@Model.ExamType</span>
-                    <h1 class="fw-bold mb-2">@Model.ExamName</h1>
-                    <p class="text-muted mb-0">
-                        Exam Code:
-                        <strong>@Model.ExamCode</strong>
-                    </p>
-                </div>
-                @if (Model.IsActive)
-                {
-                    <span class="badge bg-success fs-6">Applications Open</span>
-                }
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold mb-1">Apply for Examination</h2>
+                <p class="text-muted mb-0">
+                    Review examination details and eligibility before applying.
+                </p>
             </div>
+
+            @if (Model.IsActive)
+            {
+                <span class="badge bg-success px-3 py-2">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Applications Open
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-secondary px-3 py-2">Applications Closed</span>
+            }
         </div>
     </div>
 
-    <!-- Exam Information -->
+    <!-- Exam Overview -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-mortarboard me-2"></i>
+                Examination Information
+            </h5>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <small class="text-muted d-block mb-1">Examination Name</small>
+                    <h4 class="fw-bold mb-0">@Model.ExamName</h4>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted d-block mb-1">Exam Code</small>
+                    <strong>@Model.ExamCode</strong>
+                </div>                <div class="col-md-3">
+                    <small class="text-muted d-block mb-1">Exam Type</small>
+                    <span class="badge bg-primary">@Model.ExamType</span>
+                </div>
+                <div class="col-12">
+                    <hr class="my-1" />
+                    <small class="text-muted d-block mb-1">Description</small>
+                    <p class="mb-0 text-secondary">@Model.Description</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row g-4">
-        <!-- Left -->
+
+        <!-- LEFT COLUMN -->
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm mb-4">
+
+            <!-- Application Schedule -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        Application Schedule
+                    </h5>
+                </div>
                 <div class="card-body p-4">
-                    <h4 class="fw-bold mb-3">About the Examination</h4>
-                    <p class="text-muted">@Model.Description</p>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <small class="text-muted d-block mb-1">Application Start Date</small>
+                                <strong>@Model.ApplicationStartDate.ToString("dd MMM yyyy")</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <small class="text-muted d-block mb-1">Application Last Date</small>
+                                <strong>@Model.ApplicationEndDate.ToString("dd MMM yyyy")</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Examination Schedule -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Examination Schedule
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <small class="text-muted d-block mb-1">Examination Date</small>
+                                <strong>@Model.ExamDate.ToString("dd MMM yyyy")</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <small class="text-muted d-block mb-1">Start Time</small>
+                                <strong>@Model.StartTime</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <small class="text-muted d-block mb-1">End Time</small>
+                                <strong>@Model.EndTime</strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Eligibility -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body p-4">
-
-                    <h4 class="fw-bold mb-3">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
                         <i class="bi bi-mortarboard me-2"></i>
-                        Eligibility Criteria
-                    </h4>
-
+                        Eligibility Configuration
+                    </h5>
+                </div>
+                <div class="card-body p-4">
                     @if (Model.EligibilityConfiguration != null)
                     {
-                        <ul class="list-group list-group-flush">
+                        <!-- Qualification -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Qualification Required</h6>
+                            <div class="row g-3">
+                                @if (Model.EligibilityConfiguration.Requires10th)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-3">
+                                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                            10th Required
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.EligibilityConfiguration.Requires12th)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-3">
+                                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                            12th Required
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.EligibilityConfiguration.RequiresGraduation)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-3">
+                                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                            Graduation Required
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
 
-                            @if (Model.EligibilityConfiguration.Requires10th)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    10th qualification required
-                                </li>
-                            }
+                        <!-- 12th Status -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">12th Qualification Status</h6>
+                            <div class="row g-3">
+                                @if (Model.EligibilityConfiguration.Allow12thPassed)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-3">
+                                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                            12th Passed
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.EligibilityConfiguration.Allow12thAppearing)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-3">
+                                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                            12th Appearing
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.EligibilityConfiguration.Allow12thResultAwaited)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-3">
+                                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                            Result Awaited
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
 
-                            @if (Model.EligibilityConfiguration.Requires12th)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    12th qualification required
-                                </li>
-                            }
+                        <!-- Minimum Percentage -->
+                        @if (Model.EligibilityConfiguration.MinimumPercentage.HasValue)
+                        {
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-3">Minimum Percentage</h6>
+                                <div class="border rounded p-3">
+                                    <i class="bi bi-percent text-primary me-2"></i>
+                                    Minimum required:
+                                    <strong>@Model.EligibilityConfiguration.MinimumPercentage%</strong>
+                                </div>
+                            </div>
+                        }
 
-                            @if (Model.EligibilityConfiguration.RequiresGraduation)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Graduation qualification required
-                                </li>
-                            }
-
-                            @if (Model.EligibilityConfiguration.Allow12thPassed)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    12th Passed candidates are eligible
-                                </li>
-                            }
-
-                            @if (Model.EligibilityConfiguration.Allow12thAppearing)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    12th Appearing candidates are eligible
-                                </li>
-                            }
-
-                            @if (Model.EligibilityConfiguration.Allow12thResultAwaited)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    12th Result Awaited candidates are eligible
-                                </li>
-                            }
-
-                            @if (Model.EligibilityConfiguration.MinimumPercentage.HasValue)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Minimum Percentage:
-                                    <strong>
-                                        @Model.EligibilityConfiguration.MinimumPercentage%
-                                    </strong>
-                                </li>
-                            }
-
-                            @if (Model.EligibilityConfiguration.RequiresPhysics)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Physics required
-                                </li>
-                            }
-
-                            @if (Model.EligibilityConfiguration.RequiresChemistry)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Chemistry required
-                                </li>
-                            }
-
-                            @if (Model.EligibilityConfiguration.RequiresBiology)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Biology required
-                                </li>
-                            }
-
-                            @if (Model.EligibilityConfiguration.RequiresMathematics)
-                            {
-                                <li class="list-group-item px-0">
-                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                    Mathematics required
-                                </li>
-                            }
-                        </ul>
+                        <!-- Subjects -->
+                        <div>
+                            <h6 class="fw-bold mb-3">Required Subjects</h6>
+                            <div class="row g-3">
+                                @if (Model.EligibilityConfiguration.RequiresPhysics)
+                                {
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 text-center">
+                                            <i class="bi bi-check-circle-fill text-success d-block mb-1"></i>
+                                            Physics
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.EligibilityConfiguration.RequiresChemistry)
+                                {
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 text-center">
+                                            <i class="bi bi-check-circle-fill text-success d-block mb-1"></i>
+                                            Chemistry
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.EligibilityConfiguration.RequiresBiology)
+                                {
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 text-center">
+                                            <i class="bi bi-check-circle-fill text-success d-block mb-1"></i>
+                                            Biology
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.EligibilityConfiguration.RequiresMathematics)
+                                {
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 text-center">
+                                            <i class="bi bi-check-circle-fill text-success d-block mb-1"></i>
+                                            Mathematics
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
                     }
                     else
                     {
-                        <p class="text-muted mb-0">
+                        <div class="alert alert-secondary mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
                             Eligibility criteria have not been configured yet.
-                        </p>
+                        </div>
                     }
                 </div>
             </div>
 
             <!-- Instructions -->
-            <div class="card border-0 shadow-sm">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-check me-2"></i>
+                        Important Instructions
+                    </h5>
+                </div>
                 <div class="card-body p-4">
-                    <h4 class="fw-bold mb-3">Important Instructions</h4>
-                    <div class="text-muted">@Model.Instructions</div>
+                    @if (!string.IsNullOrWhiteSpace(Model.Instructions))
+                    {
+                        <div class="text-secondary">@Model.Instructions</div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">No instructions have been provided.</p>
+                    }
                 </div>
             </div>
         </div>
 
-        <!-- Right -->
+        <!-- RIGHT COLUMN -->
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
+            <div class="card shadow-sm border-0 sticky-lg-top" style="top: 20px;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        Application Summary
+                    </h5>
+                </div>
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">Examination Details</h5>
-
-                    <!-- Application Dates -->
-                    <div class="mb-3">
-                        <small class="text-muted d-block">Application Start Date</small>
-                        <strong>@Model.ApplicationStartDate.ToString("dd MMM yyyy")</strong>
-                    </div>
-                    <div class="mb-3">
-                        <small class="text-muted d-block">Application Last Date</small>
-                        <strong>@Model.ApplicationEndDate.ToString("dd MMM yyyy")</strong>
+                    <!-- Exam -->
+                    <div class="mb-4">
+                        <small class="text-muted d-block mb-1">Examination</small>
+                        <h5 class="fw-bold mb-0">@Model.ExamName</h5>
                     </div>
 
                     <!-- Exam Date -->
                     <div class="mb-3">
-                        <small class="text-muted d-block">Examination Date</small>
+                        <small class="text-muted d-block mb-1">Examination Date</small>
                         <strong>@Model.ExamDate.ToString("dd MMM yyyy")</strong>
                     </div>
 
                     <!-- Time -->
                     <div class="mb-3">
-                        <small class="text-muted d-block">Examination Time</small>
+                        <small class="text-muted d-block mb-1">Examination Time</small>
                         <strong>@Model.StartTime - @Model.EndTime</strong>
                     </div>
 
-                    <!-- Fee -->
-                    <div class="mb-4">
-                        <small class="text-muted d-block">Application Fee</small>
-                        <h4 class="fw-bold text-primary mb-0">₹@Model.ApplicationFee</h4>
+                    <!-- Last Date -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Application Last Date</small>
+                        <strong>@Model.ApplicationEndDate.ToString("dd MMM yyyy")</strong>
                     </div>
                     <hr />
-                    <!-- Apply Button -->
+
+                    <!-- Fee -->
+                    <div class="mb-4">
+                        <small class="text-muted d-block mb-1">Application Fee</small>
+                        <h3 class="fw-bold text-primary mb-0">₹@Model.ApplicationFee</h3>
+                    </div>
+
+                    <!-- Apply -->
                     @if (Model.IsActive)
                     {
-                        <a asp-controller="Account"asp-action="Register"asp-route-examId="@Model.Id"
-                           class="btn btn-primary btn-lg w-100">
-                            <i class="bi bi-person-plus me-2"></i>
-                            Apply Now
-                        </a>
+                        @if (User.Identity != null && User.IsInRole("Student"))
+                        {
+                            <a asp-controller="StudentApplication"
+                               asp-action="Create"
+                               asp-route-examId="@Model.Id"class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-file-earmark-person me-2"></i>
+                                Continue Application
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account"
+                               asp-action="Register"
+                               asp-route-examId="@Model.Id"class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Apply Now
+                            </a>
+                        }
                     }
                     else
                     {
-                        <button class="btn btn-secondary btn-lg w-100"disabled>
+                        <button class="btn btn-secondary btn-lg w-100" disabled>
+                            <i class="bi bi-lock me-2"></i>
                             Applications Closed
                         </button>
                     }
                     <p class="text-muted small text-center mt-3 mb-0">
-                        Registration is required before
-                        completing the application.
+                        <i class="bi bi-info-circle me-1"></i>
+                        Registration is required before completing the application.
                     </p>
                 </div>
             </div>

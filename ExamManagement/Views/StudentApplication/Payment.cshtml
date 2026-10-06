@@ -1,0 +1,215 @@
+﻿@{
+    ViewData["Title"] = "Application Payment";
+}
+
+<div class="container-fluid py-4"
+     id="paymentContainer"
+     data-application-id="@ViewBag.ApplicationId">
+    <!-- Page Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Application Payment</h2>
+        <p class="text-muted mb-0">@ViewBag.ExamName</p>
+    </div>
+    <!-- Payment Card -->
+    <div class="card shadow-sm border-0">
+        <!-- Header -->
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-credit-card me-2"></i>
+                Payment Details
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <!-- Application Information -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-file-earmark-text me-2 text-primary"></i>
+                        Application Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <!-- Application Number -->
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <small class="text-muted d-block mb-1">Application Number</small>
+                                <div class="fw-semibold">@ViewBag.ApplicationNumber</div>
+                            </div>
+                        </div>
+                        <!-- Application Fee -->
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <small class="text-muted d-block mb-1">Application Fee</small>
+                                <div class="fs-4 fw-bold text-primary">
+                                    ₹@Convert.ToDecimal(ViewBag.ApplicationFee).ToString("0.00")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Payment Status -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-wallet2 me-2 text-primary"></i>
+                        Payment Status
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center g-3">
+                        <!-- Status -->
+                        <div class="col-md-6">
+                            <small class="text-muted d-block mb-2">Current Status</small>
+                            <span class="badge bg-warning text-dark px-3 py-2">
+                                <i class="bi bi-clock me-1"></i>
+                                Pending
+                            </span>
+                        </div>
+                        <!-- Payment Action -->
+                        <div class="col-md-6 text-md-end">
+                            <button type="button"id="payNowButton"class="btn btn-primary px-4">
+                                <i class="bi bi-credit-card me-2"></i>
+                                Pay Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Note -->
+            <div class="alert alert-light border mt-4 mb-0">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-info-circle text-primary me-2 mt-1"></i>
+                    <div>
+                        <strong>Payment Information</strong>
+                        <p class="text-muted small mb-0 mt-1">
+                            Please complete the application fee payment
+                            to continue with your application.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Anti-forgery token for AJAX POST requests -->
+<form id="paymentTokenForm"asp-antiforgery="true"style="display:none;"></form>
+
+@section Scripts {
+    <!-- Razorpay Checkout -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        document
+            .getElementById("payNowButton")
+            .addEventListener("click", async function () {
+                const button = this;
+                button.disabled = true;
+                button.innerText = "Please wait...";
+
+                // Anti-forgery token
+                const token = document.querySelector('#paymentTokenForm input[name="__RequestVerificationToken"]').value;
+
+                // Application ID
+                const applicationId = document.getElementById("paymentContainer").dataset.applicationId;
+                try {
+
+                    // Create Razorpay Order
+                        const response = await fetch(
+                          '@Url.Action("CreatePaymentOrder", "StudentApplication")'
+                          + '?applicationId=@ViewBag.ApplicationId',
+                          {
+                              method: "POST",
+                              headers: {"RequestVerificationToken": token}
+                          });
+                    const result = await response.json();
+
+                    // Check Order Creation
+                    if (!response.ok || !result.success) 
+                    {
+                        throw new Error(result.message || "Unable to create payment order.");
+                    }
+
+                    // Razorpay Checkout Options
+                    const options = {key: result.key,amount: result.amount,currency: result.currency,
+                        name: result.name,description: result.description,order_id: result.orderId,
+                        prefill: 
+                        {
+                            name: result.prefill.name,
+                            email: result.prefill.email,
+                            contact: result.prefill.contact
+                        },
+                        theme: 
+                        {
+                            color: "#0d6efd"
+                        },
+
+                        // Payment Successful
+                        handler: async function (paymentResponse) 
+                        {
+                            try {
+                                const verifyResponse = await fetch('@Url.Action("VerifyPayment", "StudentApplication")',
+                                        {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                                "RequestVerificationToken": token
+                                            },
+                                            body: JSON.stringify({
+                                                razorpayOrderId: paymentResponse.razorpay_order_id,
+                                                razorpayPaymentId: paymentResponse.razorpay_payment_id,
+                                                razorpaySignature: paymentResponse.razorpay_signature
+                                            })
+                                        }
+                                    );
+
+                                const verifyResult = await verifyResponse.json();
+                                // Payment Verification Failed
+                                if (!verifyResponse.ok || !verifyResult.success) 
+                                {
+                                    alert(verifyResult.message || "Payment verification failed.");
+                                    button.disabled = false;
+                                    button.innerText = "Pay Now";
+                                    return;
+                                }
+
+                                // Payment Successfully Verified
+                                window.location.href = '@Url.Action("Review", "StudentApplication")'
+                                    + '?applicationId='
+                                    + verifyResult.applicationId;
+                            }
+                            catch (error) 
+                            {
+                                console.error(error);
+                                alert("Payment verification failed. Please contact support.");
+                                button.disabled = false;
+                                button.innerText = "Pay Now";
+                            }
+                        },
+
+                        // Razorpay Checkout Closed
+                        modal: {
+                            ondismiss: function () 
+                            {
+                                button.disabled = false;
+                                button.innerText = "Pay Now";
+                            }
+                        }
+                    };
+
+                    // Open Razorpay Checkout
+                    const razorpay = new Razorpay(options);
+                    razorpay.open();
+                }
+                catch (error) 
+                {
+                    console.error(error);
+                    alert(error.message || "Unable to start payment.");
+                    button.disabled = false;
+                    button.innerText = "Pay Now";
+                }
+            });
+    </script>
+}

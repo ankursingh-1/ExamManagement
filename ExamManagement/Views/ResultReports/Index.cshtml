@@ -1,0 +1,408 @@
+﻿@model ExamManagement.ViewModels.ResultReportViewModel
+
+@{
+    ViewData["Title"] = "Result Reports";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-bar-chart-line-fill me-2"></i>
+                Result Reports
+            </h2>
+            <p class="text-muted mb-0">
+                View and analyze examination results.
+            </p>
+        </div>
+            <a asp-controller="Admin"
+               asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>
+                Dashboard
+            </a>
+            <div class="d-flex gap-2">
+                <a asp-action="ExportExcel"
+                   asp-route-examId="@Model.SelectedExamId"
+                   asp-route-category="@Model.SelectedCategory"
+                   asp-route-status="@Model.SelectedStatus"class="btn btn-success">
+                    <i class="bi bi-file-earmark-excel me-1"></i>
+                    Export Excel
+                </a>
+                <button type="button"class="btn btn-outline-primary"onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i>
+                    Print Report
+                </button>
+            </div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="card shadow-sm border-0 mb-4 no-print">
+        <div class="card-body">
+            <form asp-action="Index"
+                  asp-controller="ResultReports"method="get">
+                <div class="row g-3">
+                    <!-- EXAM -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">
+                            Examination
+                        </label>
+                        <select name="examId"class="form-select">
+                            <option value="">All Examinations</option>
+
+                            @foreach (var exam in Model.Exams)
+                            {
+                                if (Model.SelectedExamId == exam.Id)
+                                {
+                                    <option value="@exam.Id" selected>@exam.ExamName</option>
+                                }
+                                else
+                                {
+                                    <option value="@exam.Id">@exam.ExamName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- CATEGORY -->
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Category</label>
+                        <select name="category"class="form-select">
+                            <option value="">All Categories</option>
+                            @if (Model.SelectedCategory == "General")
+                            {
+                                <option value="General" selected>General</option>
+                            }
+                            else
+                            {
+                                <option value="General">General</option>
+                            }
+
+                            @if (Model.SelectedCategory == "OBC")
+                            {
+                                <option value="OBC" selected>OBC</option>
+                            }
+                            else
+                            {
+                                <option value="OBC">OBC</option>
+                            }
+
+                            @if (Model.SelectedCategory == "SC")
+                            {
+                                <option value="SC" selected>SC</option>
+                            }
+                            else
+                            {
+                                <option value="SC">SC</option>
+                            }
+
+                            @if (Model.SelectedCategory == "ST")
+                            {
+                                <option value="ST" selected>ST</option>
+                            }
+                            else
+                            {
+                                <option value="ST">ST</option>
+                            }
+
+                            @if (Model.SelectedCategory == "EWS")
+                            {
+                                <option value="EWS" selected>EWS</option>
+                            }
+                            else
+                            {
+                                <option value="EWS">EWS</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- STATUS -->
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Result Status</label>
+                        <select name="status"class="form-select">
+                            <option value="">All Results</option>
+                            @if (Model.SelectedStatus == "Qualified")
+                            {
+                                <option value="Qualified" selected>Qualified</option>
+                            }
+                            else
+                            {
+                                <option value="Qualified">Qualified</option>
+                            }
+
+                            @if (Model.SelectedStatus == "Not Qualified")
+                            {
+                                <option value="Not Qualified" selected>Not Qualified</option>
+                            }
+                            else
+                            {
+                                <option value="Not Qualified">Not Qualified</option>
+                            }
+
+                            @if (Model.SelectedStatus == "Pending")
+                            {
+                                <option value="Pending" selected>Pending </option>
+                            }
+                            else
+                            {
+                                <option value="Pending">Pending</option>
+                            }
+
+                            @if (Model.SelectedStatus == "Published")
+                            {
+                                <option value="Published" selected>Published</option>
+                            }
+                            else
+                            {
+                                <option value="Published">Published</option>
+                            }
+
+                            @if (Model.SelectedStatus == "Unpublished")
+                            {
+                                <option value="Unpublished" selected>Unpublished</option>
+                            }
+                            else
+                            {
+                                <option value="Unpublished">Unpublished</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- BUTTON -->
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit"class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i>
+                            Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- STATISTICS -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-lg">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        Total Results
+                    </div>
+                    <div class="fs-3 fw-bold">
+                        @Model.TotalResults
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        Qualified
+                    </div>
+                    <div class="fs-3 fw-bold text-success">
+                        @Model.QualifiedCount
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        Not Qualified
+                    </div>
+                    <div class="fs-3 fw-bold text-danger">
+                        @Model.NotQualifiedCount
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        Published
+                    </div>
+                    <div class="fs-3 fw-bold text-primary">
+                        @Model.PublishedCount
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        Unpublished
+                    </div>
+                    <div class="fs-3 fw-bold text-warning">
+                        @Model.UnpublishedCount
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS TABLE -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Student</th>
+                            <th>Application No.</th>
+                            <th>Exam</th>
+                            <th>Category</th>
+                            <th>Total Marks</th>
+                            <th>Obtained</th>
+                            <th>Percentage</th>
+                            <th>Cutoff</th>
+                            <th>Result</th>
+                            <th>Publish</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Results.Any())
+                        {
+                            var index = 1;
+                            foreach (var result in Model.Results)
+                            {
+                                var studentName = result.StudentApplication?.FullName ?? "N/A";
+
+                                var applicationNumber = result.StudentApplication?.ApplicationNumber ?? "N/A";
+
+                                var category = string.IsNullOrWhiteSpace( result.StudentApplication?.Category)
+                                ? "General"
+                                : result.StudentApplication!.Category;
+                                <tr>
+                                    <td>
+                                        @index
+                                    </td>
+                                    <td>
+                                        <strong>
+                                            @studentName
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold">
+                                            @applicationNumber
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @result.Exam?.ExamName
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            @category
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @result.TotalMarks.ToString("0.00")
+                                    </td>
+                                    <td>
+                                        @result.ObtainedMarks.ToString("0.00")
+                                    </td>
+                                    <td>
+                                        <strong>@result.Percentage.ToString("0.00")%</strong>
+                                    </td>
+                                    <td>
+                                        @if (result.CutoffStatus == "Qualified")
+                                        {
+                                            <span class="badge bg-success">Qualified</span>
+                                        }
+                                        else if (result.CutoffStatus == "Not Qualified")
+                                        {
+                                            <span class="badge bg-danger">Not Qualified</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (result.CutoffStatus == "Qualified")
+                                        {
+                                            <span class="text-success fw-semibold">Qualified</span>
+                                        }
+                                        else if (result.CutoffStatus == "Not Qualified")
+                                        {
+                                            <span class="text-danger fw-semibold">Not Qualified</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Pending</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (result.IsPublished)
+                                        {
+                                            <span class="badge bg-primary">Published</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Unpublished</span>
+                                        }
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="11"
+                                    class="text-center py-5">
+                                    <i class="bi bi-bar-chart fs-1 text-muted"></i>
+                                    <div class="mt-2 text-muted">No result records found.</div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        nav,
+        header,
+        footer,
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            background: white !important;
+        }
+
+        .container,
+        .container-fluid {
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+
+        .table {
+            font-size: 11px;
+        }
+
+            .table th,
+            .table td {
+                padding: 6px !important;
+            }
+    }
+</style>

@@ -1,0 +1,93 @@
+﻿@model ExamManagement.Models.ExamCenter
+
+@{
+    ViewData["Title"] = "Add Exam Center";
+    var exams = ViewBag.Exams as List<ExamManagement.Models.Exam>
+                 ?? new List<ExamManagement.Models.Exam>();
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Add Exam Center</h2>
+            <p class="text-muted mb-0">
+                Create an examination center.
+            </p>
+        </div>
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>
+            Back
+        </a>
+    </div>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger">
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="ExamId"class="form-label">Examination</label>
+                        <select asp-for="ExamId"class="form-select">
+                            <option value=""> -- Select Examination -- </option>
+                            @foreach (var exam in exams)
+                            {
+                                <option value="@exam.Id">@exam.ExamName</option>
+                            }
+                        </select>
+                        <span asp-validation-for="ExamId"class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CenterName"class="form-label">Center Name</label>
+                        <input asp-for="CenterName"class="form-control"placeholder="Enter center name" />
+                        <span asp-validation-for="CenterName"class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Address"class="form-label">Address</label>
+                        <textarea asp-for="Address"class="form-control"rows="3"
+                                  placeholder="Enter complete address">
+                        </textarea>
+                        <span asp-validation-for="Address"class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="City"class="form-label">City</label>
+                        <input asp-for="City"class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="State"class="form-label">State</label>
+                        <input asp-for="State"class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Pincode"class="form-label">Pincode</label>
+                        <input asp-for="Pincode"class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Capacity"class="form-label">Capacity</label>
+                        <input asp-for="Capacity"type="number"min="1"class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Status</label>
+                        <div class="form-check mt-2">
+                            <input asp-for="IsActive"class="form-check-input" />
+                            <label asp-for="IsActive"class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4" />
+                <button type="submit"class="btn btn-primary">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Save Exam Center
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

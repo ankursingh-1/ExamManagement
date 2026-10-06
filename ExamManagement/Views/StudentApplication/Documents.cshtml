@@ -1,0 +1,168 @@
+﻿@model ExamManagement.ViewModels.StudentDocumentsViewModel
+
+@{
+    ViewData["Title"] = "Student Application - Documents";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Student Application</h2>
+        <p class="text-muted mb-0">@ViewBag.ExamName</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-semibold">Step 3 of 6</span>
+                <span class="text-muted">Documents</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar"role="progressbar"style="width: 50%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Form -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-file-earmark-arrow-up me-2"></i>
+                Upload Documents
+            </h5>
+        </div>
+        <div class="card-body p-4">
+
+            <!-- Information -->
+            <div class="alert alert-info d-flex align-items-start mb-4">
+                <i class="bi bi-info-circle me-2 mt-1"></i>
+                <div>
+                    <strong>Document Upload Guidelines</strong>
+                    <div class="small mt-1">Allowed file formats: JPG, JPEG, PNG and PDF.</div>
+                </div>
+            </div>
+            <form asp-action="Documents"method="post"enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input asp-for="ApplicationId" type="hidden" />
+                <input asp-for="ExamId" type="hidden" />
+
+                <!-- Validation -->
+                <div asp-validation-summary="ModelOnly"class="alert alert-danger"></div>
+
+                <!-- Personal Documents -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-person-vcard me-2 text-primary"></i>
+                            Personal Documents
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+
+                            <!-- Photo -->
+                            <div class="col-md-6">
+                                <label asp-for="Photo"class="form-label fw-semibold"></label>
+                                <input asp-for="Photo"type="file"class="form-control"accept=".jpg,.jpeg,.png" />
+                                <div class="form-text">JPG, JPEG or PNG</div>
+                                <span asp-validation-for="Photo"class="text-danger"></span>
+                            </div>
+
+                            <!-- Signature -->
+                            <div class="col-md-6">
+                                <label asp-for="Signature"class="form-label fw-semibold"></label>
+                                <input asp-for="Signature"type="file"class="form-control"accept=".jpg,.jpeg,.png" />
+                                <div class="form-text">JPG, JPEG or PNG</div>
+                                <span asp-validation-for="Signature"class="text-danger"></span>
+                            </div>
+
+                            <!-- Aadhaar -->
+                            <div class="col-md-6">
+                                <label asp-for="AadhaarCard"class="form-label fw-semibold"></label>
+                                <input asp-for="AadhaarCard"type="file"class="form-control"
+                                       accept=".jpg,.jpeg,.png,.pdf" />
+                                <div class="form-text">JPG, JPEG, PNG or PDF</div>
+                                <span asp-validation-for="AadhaarCard"class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Educational Documents -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-mortarboard me-2 text-primary"></i>
+                            Educational Documents
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+
+                            <!-- 10th -->
+                            <div class="col-md-6">
+                                <label asp-for="TenthMarksheet"class="form-label fw-semibold"></label>
+                                <input asp-for="TenthMarksheet"type="file"class="form-control"
+                                       accept=".jpg,.jpeg,.png,.pdf" />
+                                <div class="form-text">JPG, JPEG, PNG or PDF</div>
+                                <span asp-validation-for="TenthMarksheet"class="text-danger"></span>
+                            </div>
+
+                            <!-- 12th -->
+                            <div class="col-md-6">
+                                <label asp-for="TwelfthMarksheet"class="form-label fw-semibold"></label>
+                                <input asp-for="TwelfthMarksheet"type="file"class="form-control"
+                                       accept=".jpg,.jpeg,.png,.pdf" />
+                                <div class="form-text">JPG, JPEG, PNG or PDF</div>
+                                <span asp-validation-for="TwelfthMarksheet"class="text-danger"></span>
+                            </div>
+
+                            <!-- Graduation -->
+                            <div class="col-md-6">
+                                <label asp-for="GraduationDocument"class="form-label fw-semibold"></label>
+                                <input asp-for="GraduationDocument"type="file"class="form-control"
+                                       accept=".jpg,.jpeg,.png,.pdf" />
+                                <div class="form-text">JPG, JPEG, PNG or PDF</div>
+                                <span asp-validation-for="GraduationDocument"class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Note -->
+                <div class="alert alert-light border mb-4">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-shield-check text-primary me-2 mt-1"></i>
+                        <div>
+                            <strong>Important</strong>
+                            <p class="text-muted small mb-0 mt-1">
+                                Please upload clear and readable documents.
+                                Make sure the information is visible before
+                                continuing your application.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4" />
+
+                <!-- Buttons -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-action="Qualification"
+                       asp-route-applicationId="@Model.ApplicationId"class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Back
+                    </a>
+                    <button type="submit"class="btn btn-primary px-4">
+                        Save & Continue
+                        <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

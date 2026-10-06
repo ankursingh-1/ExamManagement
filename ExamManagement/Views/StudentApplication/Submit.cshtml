@@ -1,0 +1,63 @@
+﻿@model ExamManagement.Models.StudentApplication
+
+@{
+    ViewData["Title"] = "Final Submit";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Final Submit</h2>
+        <p class="text-muted mb-0">@ViewBag.ExamName</p>
+    </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <div class="alert alert-warning">
+                <strong>Important:</strong>
+                Please make sure that all information entered by you is correct.
+                After final submission, the application will be marked as
+                <strong>Submitted</strong>.
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <small class="text-muted">Application Number</small>
+                    <div class="fw-semibold">@Model.ApplicationNumber</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">Application Status</small>
+                    <div>
+                        <span class="badge bg-warning text-dark">@Model.Status</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">Candidate Name</small>
+                    <div class="fw-semibold">@Model.FullName</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">Exam</small>
+                    <div class="fw-semibold">@ViewBag.ExamName</div>
+                </div>
+            </div>
+            <hr />
+            <form asp-action="Submit"asp-controller="StudentApplication"method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden"name="applicationId"value="@Model.Id" />
+                <div class="form-check mb-4">
+                    <input class="form-check-input"type="checkbox"id="confirmation"
+                           name="confirmation"value="confirmed"required />
+                    <label class="form-check-label"for="confirmation">
+                        I confirm that the information and documents
+                        provided in this application are correct and
+                        complete.
+                    </label>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Review"
+                       asp-route-applicationId="@Model.Id"class="btn btn-outline-secondary">
+                        Back to Review
+                    </a>
+                    <button type="submit"class="btn btn-success px-4">Submit Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

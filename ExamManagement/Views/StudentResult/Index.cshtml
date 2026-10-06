@@ -1,0 +1,259 @@
+﻿@model ExamManagement.ViewModels.StudentResultViewModel
+
+@{
+    ViewData["Title"] = "My Result";
+
+    var category = string.IsNullOrWhiteSpace(Model.Application.Category)
+        ? "General"
+        : Model.Application.Category;
+}
+
+<div class="container py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Examination Result</h2>
+            <p class="text-muted mb-0">@Model.Exam.ExamName</p>
+        </div>
+        <div>
+        <a asp-controller="Student"
+           asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Dashboard
+        </a>
+        <button type="button"class="btn btn-outline-primary"onclick="window.print()">
+            <i class="bi bi-printer me-1"></i>
+            Print Result
+        </button>
+        </div>
+    </div>
+
+    <!-- RESULT STATUS -->
+    @if (Model.Result.CutoffStatus == "Qualified")
+    {
+        <div class="alert alert-success d-flex align-items-center">
+            <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+            <div>
+                <strong>Qualified</strong>
+                <div>You have qualified according to the applicable cut-off.</div>
+            </div>
+        </div>
+    }
+    else if (Model.Result.CutoffStatus == "Not Qualified")
+    {
+        <div class="alert alert-danger d-flex align-items-center">
+            <i class="bi bi-x-circle-fill fs-4 me-3"></i>
+            <div>
+                <strong>Not Qualified</strong>
+                <div>Your score is below the applicable cut-off.</div>
+            </div>
+        </div>
+    }
+
+    <!-- APPLICATION DETAILS -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">Application Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Application Number</small>
+                    <strong>@Model.Application.ApplicationNumber</strong>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Student Name</small>
+                    <strong> @Model.Application.FullName</strong>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Category</small>
+                    <span class="badge bg-secondary">@category</span>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Examination</small>
+                    <strong>@Model.Exam.ExamName</strong>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Result Status</small>
+                    <span class="badge bg-success">Published</span>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Published Date</small>
+                    <strong>
+                        @(Model.Result.PublishedAt?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") ?? "-")
+                    </strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCORE SUMMARY -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">Result Summary</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center">
+                        <small class="text-muted d-block">Total Marks</small>
+                        <h3 class="fw-bold mb-0">@Model.Result.TotalMarks</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center">
+                        <small class="text-muted d-block">Obtained Marks</small>
+                        <h3 class="fw-bold mb-0">@Model.Result.ObtainedMarks</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center">
+                        <small class="text-muted d-block">Percentage</small>
+                        <h3 class="fw-bold mb-0">@Model.Result.Percentage%</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center">
+                        <small class="text-muted d-block">Required Cut-off</small>
+                        @if (Model.Cutoff != null)
+                        {
+                            <h3 class="fw-bold mb-0">@Model.Cutoff.CutoffValue%</h3>
+                            <small class="text-muted">@Model.Cutoff.CutoffType</small>
+                        }
+                        else
+                        {
+                            <h5 class="text-muted mb-0">Not Configured</h5>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBJECT-WISE MARKS -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">Subject-wise Marks</h5>
+        </div>
+        <div class="card-body">
+            @if (!Model.Subjects.Any())
+            {
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-journal-x fs-2"></i>
+                    <p class="mb-0 mt-2">Subject-wise marks are not available.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>
+                                    Subject
+                                </th>
+                                <th class="text-center">
+                                    Total Marks
+                                </th>
+                                <th class="text-center">
+                                    Obtained Marks
+                                </th>
+                                <th class="text-center">
+                                    Percentage
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var subject in Model.Subjects)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@subject.SubjectName</strong>
+                                    </td>
+                                    <td class="text-center">
+                                        @subject.TotalMarks
+                                    </td>
+                                    <td class="text-center">
+                                        @subject.ObtainedMarks
+                                    </td>
+                                    <td class="text-center">
+                                        <strong>@subject.Percentage%</strong>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th>
+                                    Total
+                                </th>
+                                <th class="text-center">
+                                    @Model.Result.TotalMarks
+                                </th>
+                                <th class="text-center">
+                                    @Model.Result.ObtainedMarks
+                                </th>
+                                <th class="text-center">
+                                    @Model.Result.Percentage%
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- FINAL RESULT -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body text-center py-4">
+            <h5 class="fw-bold">Final Result</h5>
+            @if (Model.Result.CutoffStatus == "Qualified")
+            {
+                <div class="display-6 fw-bold text-success">QUALIFIED</div>
+                <p class="text-muted mb-0">
+                    You have qualified based on the configured cut-off.
+                </p>
+            }
+            else
+            {
+                <div class="display-6 fw-bold text-danger">NOT QUALIFIED</div>
+                <p class="text-muted mb-0">Your score is below the configured cut-off.</p>
+            }
+        </div>
+    </div>
+
+    <!-- FOOTER NOTE -->
+    <div class="text-center text-muted small">
+        <p class="mb-1">
+            This result has been published by the Examination Management System.
+        </p>
+        <p class="mb-0">
+            Please retain a copy of this result for your records.
+        </p>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        nav,
+        header,
+        footer,
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            background: white !important;
+        }
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+        .container {
+            max-width: 100% !important;
+        }
+    }
+</style>

@@ -1,0 +1,873 @@
+﻿@model ExamManagement.Models.StudentApplication
+
+@{
+    ViewData["Title"] = "Hall Ticket";
+    var exam = ViewBag.Exam as ExamManagement.Models.Exam;
+    var center = ViewBag.ExamCenter as ExamManagement.Models.ExamCenter;
+    var photo = ViewBag.Photo as ExamManagement.Models.StudentApplicationDocument;
+    var signature = ViewBag.Signature as ExamManagement.Models.StudentApplicationDocument;
+    var institute = ViewBag.Institute as ExamManagement.Models.InstituteSetting;
+}
+
+<div class="container-fluid py-4">
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-ticket-perforated text-primary me-2"></i>
+                Hall Ticket
+            </h2>
+            <p class="text-muted mb-0">@Model.HallTicketNumber</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="Student"
+               asp-action="Index"class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>
+                Dashboard
+            </a>
+            <button type="button"class="btn btn-primary"onclick="window.print();">
+                <i class="bi bi-printer me-1"></i>
+                Print / Download PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- HALL TICKET -->
+    <div class="hall-ticket">
+        <!-- HEADER -->
+        <div class="hall-header">
+            <!-- INSTITUTE LOGO -->
+            <div class="institute-logo-wrapper">
+                @if (institute != null && !string.IsNullOrWhiteSpace(institute.LogoPath))
+                {
+                    <img src="@institute.LogoPath"alt="Institute Logo"class="institute-logo" />
+                }
+                else
+                {
+                    <div class="institute-logo-placeholder"><i class="bi bi-building"></i></div>
+                }
+            </div>
+            <!-- INSTITUTE INFORMATION -->
+            <div class="header-content">
+                <div class="system-name">
+                    @(institute?.InstituteName ?? "EXAMINATION MANAGEMENT SYSTEM")
+                </div>
+                @if (institute != null)
+                {
+                    @if (!string.IsNullOrWhiteSpace(institute.InstituteCode))
+                    {
+                        <div class="institute-code"></div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(institute.Address) ||
+                                    !string.IsNullOrWhiteSpace(institute.City) ||
+                                    !string.IsNullOrWhiteSpace(institute.State) ||
+                                    !string.IsNullOrWhiteSpace(institute.PinCode))
+                    {
+                        <div class="institute-address">
+                            @if (!string.IsNullOrWhiteSpace(institute.Address))
+                            {
+                                <span>@institute.Address</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(institute.City))
+                            {
+                                @if (!string.IsNullOrWhiteSpace(institute.Address))
+                                {
+                                    <span>, </span>
+                                }
+                                <span>@institute.City</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(institute.State))
+                            {
+                                <span>, @institute.State</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(institute.PinCode))
+                            {
+                                <span> - @institute.PinCode</span>
+                            }
+                        </div>
+                    }
+                }
+                <div class="exam-name">@exam?.ExamName</div>
+                <div class="hall-badge">HALL TICKET</div>
+            </div>
+            <!-- RIGHT ICON -->
+            <div class="header-icon"><i class="bi bi-patch-check-fill"></i></div>
+        </div>
+
+        <!-- IDENTIFICATION -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">HALL TICKET NUMBER</div>
+                    <div class="info-value text-primary">@Model.HallTicketNumber</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-box">
+                    <div class="info-label">APPLICATION NUMBER</div>
+                    <div class="info-value">@Model.ApplicationNumber</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CANDIDATE DETAILS -->
+        <div class="section-title">
+            <i class="bi bi-person-vcard me-2"></i>
+            Candidate Details
+        </div>
+        <div class="row g-4 mb-4">
+
+            <!-- PHOTO -->
+            <div class="col-md-3">
+                <div class="photo-wrapper">
+                    @if (photo != null)
+                    {
+                        <img src="@Url.Action("Document","StudentApplication",new { documentId = photo.Id })"
+                         alt="Student Photo"class="student-photo" />
+                     }
+                    else
+                    {
+                        <div class="photo-placeholder">
+                            <i class="bi bi-person fs-1"></i>
+                            <span>Photo</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- DETAILS -->
+            <div class="col-md-9">
+                <div class="details-card">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="detail-label">Candidate Name</div>
+                            <div class="detail-value">@Model.FullName</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">Father's Name</div>
+                            <div class="detail-value">@Model.FatherName</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-label">Mother's Name</div>
+                            <div class="detail-value">@Model.MotherName</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-label">Date of Birth</div>
+                            <div class="detail-value">@Model.DateOfBirth</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-label">Gender</div>
+                            <div class="detail-value">@Model.Gender</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXAMINATION DETAILS -->
+        <div class="section-title">
+            <i class="bi bi-calendar-event me-2"></i>
+            Examination Details
+        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="exam-box">
+                    <div class="exam-icon"><i class="bi bi-book"></i></div>
+                    <div>
+                        <div class="info-label">Examination</div>
+                        <div class="info-value">@exam?.ExamName</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="exam-box">
+                    <div class="exam-icon"><i class="bi bi-calendar3"></i></div>
+                    <div>
+                        <div class="info-label">Examination Date</div>
+                        <div class="info-value">@exam?.ExamDate</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="exam-box">
+                    <div class="exam-icon"><i class="bi bi-clock"></i></div>
+                    <div>
+                        <div class="info-label">Reporting Time</div>
+                        <div class="info-value">@Model.ExamReportingTime</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="exam-box">
+                    <div class="exam-icon"><i class="bi bi-building"></i></div>
+                    <div>
+                        <div class="info-label">Examination Center</div>
+                        <div class="info-value">@center?.CenterName</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER ADDRESS -->
+        <div class="section-title">
+            <i class="bi bi-geo-alt me-2"></i>
+            Examination Center Address
+        </div>
+        <div class="center-address mb-4">
+            <div class="location-icon"><i class="bi bi-geo-alt-fill"></i></div>
+            <div>
+                <div class="center-name">@center?.CenterName</div>
+                <div class="center-text">@center?.Address</div>
+                <div class="center-text">
+                    @center?.City,
+                    @center?.State -
+                    @center?.Pincode
+                </div>
+            </div>
+        </div>
+
+        <!-- IMPORTANT INSTRUCTIONS -->
+        <div class="section-title">
+            <i class="bi bi-info-circle me-2"></i>
+            Important Instructions
+        </div>
+        <div class="instructions mb-4">
+            <ol>
+                <li>
+                    Candidate must carry a printed copy of this Hall Ticket.
+                </li>
+                <li>
+                    Candidate must report to the examination center before the reporting time.
+                </li>
+                <li>
+                    Candidate must carry a valid photo identification document.
+                </li>
+                <li>
+                    Electronic devices are not allowed inside the examination hall.
+                </li>
+                <li>
+                    Candidate must follow all instructions given by the examination authority.
+                </li>
+                <li>
+                    Candidate should verify the examination center address before leaving for the examination.
+                </li>
+            </ol>
+        </div>
+
+        <!-- SIGNATURE -->
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="signature-section">
+                    @if (signature != null)
+                    {
+                        <img src="@Url.Action("Document","StudentApplication",new { documentId = signature.Id })"
+                         alt="Student Signature"class="student-signature" />
+                    }
+                    else
+                    {
+                        <div class="signature-space"></div>
+                    }
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Candidate Signature</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="signature-section authority">
+                    <div class="signature-space"></div>
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Authorized Signature</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="hall-footer">
+            <div class="fw-bold">EXAMINATION MANAGEMENT SYSTEM</div>
+            <div>This Hall Ticket is system generated.</div>
+        </div>
+    </div>
+</div>
+<style>
+
+/*MAIN HALL TICKET*/
+    .hall-ticket {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px;
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+    }
+
+/* HEADER*/
+    .hall-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding-bottom: 22px;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .header-icon {
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0d6efd;
+        font-size: 27px;
+    }
+
+    .header-content {
+        flex: 1;
+        text-align: center;
+    }
+
+    .system-name {
+        font-size: 23px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .exam-name {
+        margin-top: 5px;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .hall-badge {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 6px 20px;
+        border-radius: 20px;
+        background: #0d6efd;
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+/* INSTITUTE LOGO */
+    .institute-logo-wrapper {
+        width: 90px;
+        min-width: 90px;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .institute-logo {
+        width: 85px;
+        height: 85px;
+        object-fit: contain;
+    }
+
+    .institute-logo-placeholder {
+        width: 75px;
+        height: 75px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 30px;
+    }
+
+/* INSTITUTE CODE */
+    .institute-code {
+        margin-top: 2px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #6c757d;
+        letter-spacing: 0.5px;
+    }
+
+/* INSTITUTE ADDRESS */
+    .institute-address {
+        margin-top: 3px;
+        font-size: 12px;
+        color: #6c757d;
+        line-height: 1.4;
+    }
+
+/*INFORMATION BOX*/
+    .info-box {
+        height: 100%;
+        padding: 15px 18px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    .info-label {
+        margin-bottom: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .info-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #212529;
+    }
+
+/*SECTION TITLE*/
+    .section-title {
+        margin-bottom: 16px;
+        padding-bottom: 9px;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 17px;
+        font-weight: 700;
+        color: #212529;
+    }
+
+/*PHOTO*/
+    .photo-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    .student-photo,
+    .photo-placeholder {
+        width: 170px;
+        height: 200px;
+        object-fit: cover;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+    }
+
+    .photo-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        color: #6c757d;
+    }
+
+/*CANDIDATE DETAILS*/
+    .details-card {
+        height: 100%;
+        padding: 22px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background: #ffffff;
+    }
+
+    .detail-label {
+        margin-bottom: 4px;
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+    .detail-value {
+        font-size: 15px;
+        font-weight: 600;
+        color: #212529;
+    }
+
+/*EXAM DETAILS*/
+    .exam-box {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        height: 100%;
+        padding: 16px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background: #ffffff;
+    }
+
+    .exam-icon {
+        width: 45px;
+        height: 45px;
+        min-width: 45px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0d6efd;
+        font-size: 20px;
+    }
+
+/*CENTER ADDRESS*/
+    .center-address {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 18px;
+        border: 1px solid #dee2e6;
+        border-left: 4px solid #0d6efd;
+        border-radius: 8px;
+        background: #f8f9fa;
+    }
+
+    .location-icon {
+        font-size: 25px;
+        color: #0d6efd;
+    }
+
+    .center-name {
+        margin-bottom: 4px;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .center-text {
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+/*INSTRUCTIONS*/
+    .instructions {
+        padding: 18px 22px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background: #f8f9fa;
+    }
+
+        .instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+            .instructions li:last-child {
+                margin-bottom: 0;
+            }
+
+/*SIGNATURE*/
+    .signature-section {
+        min-height: 110px;
+    }
+
+    .student-signature {
+        display: block;
+        max-width: 180px;
+        max-height: 65px;
+        object-fit: contain;
+        margin-bottom: 8px;
+    }
+
+    .signature-space {
+        height: 65px;
+    }
+
+    .signature-line {
+        width: 200px;
+        border-top: 1px solid #212529;
+    }
+
+    .signature-label {
+        width: 200px;
+        padding-top: 7px;
+        font-size: 12px;
+        color: #6c757d;
+        text-align: center;
+    }
+
+    .authority {
+        text-align: right;
+    }
+
+        .authority .signature-line,
+        .authority .signature-label {
+            margin-left: auto;
+        }
+
+/*FOOTER*/
+    .hall-footer {
+        margin-top: 35px;
+        padding-top: 15px;
+        border-top: 1px solid #dee2e6;
+        text-align: center;
+        font-size: 12px;
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+/*PRINT*/
+    @@media print {
+        /* Hide application layout */
+        body:has(.hall-ticket) nav,
+        body:has(.hall-ticket) header,
+        body:has(.hall-ticket) footer,
+        body:has(.hall-ticket) .navbar,
+        body:has(.hall-ticket) .no-print {
+            display: none !important;
+        }
+
+        html,
+        body {
+            width: 100%;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+        }
+            /* Remove Bootstrap/layout spacing */
+            body:has(.hall-ticket) .container-fluid {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        /* Main Hall Ticket */
+        .hall-ticket {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 16px !important;
+            border: 1px solid #000000 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: #ffffff !important;
+        }
+        /* Header */
+        .hall-header {
+            gap: 12px;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #000000;
+        }
+
+        .institute-logo-wrapper {
+            width: 65px;
+            min-width: 65px;
+            height: 65px;
+        }
+
+        .institute-logo {
+            width: 60px;
+            height: 60px;
+        }
+
+        .institute-logo-placeholder {
+            width: 55px;
+            height: 55px;
+            font-size: 22px;
+        }
+        .header-icon {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            font-size: 18px;
+        }
+        .system-name {
+            font-size: 17px;
+            line-height: 1.2;
+        }
+
+        .institute-code {
+            font-size: 9px;
+        }
+        .institute-address {
+            font-size: 9px;
+            line-height: 1.3;
+        }
+        .exam-name {
+            margin-top: 3px;
+            font-size: 14px;
+        }
+        .hall-badge {
+            margin-top: 5px;
+            padding: 4px 12px;
+            font-size: 9px;
+        }
+        /* General text */
+        .info-label {
+            font-size: 8px;
+        }
+        .info-value {
+            font-size: 11px;
+        }
+        /* Identification */
+        .info-box {
+            padding: 8px 10px;
+        }
+        /* Section headings */
+        .section-title {
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            font-size: 13px;
+        }
+        /* Candidate */
+        .student-photo,
+        .photo-placeholder {
+            width: 120px;
+            height: 145px;
+        }
+
+        .details-card {
+            padding: 12px;
+        }
+
+        .detail-label {
+            font-size: 9px;
+        }
+
+        .detail-value {
+            font-size: 11px;
+        }
+        /* Examination */
+        .exam-box {
+            padding: 8px;
+            gap: 9px;
+        }
+        .exam-icon {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            font-size: 13px;
+        }
+        /* Center */
+        .center-address {
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .location-icon {
+            font-size: 18px;
+        }
+
+        .center-name {
+            font-size: 13px;
+        }
+
+        .center-text {
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        /* Instructions */
+        .instructions {
+            padding: 10px 14px;
+        }
+            .instructions li {
+                margin-bottom: 4px;
+                font-size: 9px;
+                line-height: 1.35;
+            }
+        /* Signature */
+        .signature-section {
+            min-height: 75px;
+        }
+
+        .student-signature {
+            max-width: 140px;
+            max-height: 45px;
+        }
+
+        .signature-space {
+            height: 45px;
+        }
+
+        .signature-line {
+            width: 170px;
+        }
+
+        .signature-label {
+            width: 170px;
+            padding-top: 4px;
+            font-size: 9px;
+        }
+        /* Hall Ticket footer */
+        .hall-footer {
+            margin-top: 15px;
+            padding-top: 8px;
+            font-size: 9px;
+        }
+        /* Avoid breaking individual sections */
+        .info-box,
+        .details-card,
+        .exam-box,
+        .center-address,
+        .instructions,
+        .signature-section {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        /* Do not show unnecessary shadows */
+        * {
+            box-shadow: none !important;
+        }
+    }
+
+/*MOBILE*/
+    @@media (max-width: 768px) {
+
+        .hall-ticket {
+            padding: 18px;
+        }
+
+        .hall-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .header-icon {
+            display: none;
+        }
+
+        .institute-logo-wrapper {
+            width: 75px;
+            min-width: 75px;
+            height: 75px;
+        }
+
+        .institute-logo {
+            width: 70px;
+            height: 70px;
+        }
+
+        .institute-logo-placeholder {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+        }
+
+        .institute-address {
+            font-size: 11px;
+        }
+
+        .system-name {
+            font-size: 19px;
+        }
+
+        .exam-name {
+            font-size: 16px;
+        }
+
+        .photo-wrapper {
+            margin-bottom: 5px;
+        }
+
+        .authority {
+            margin-top: 30px;
+            text-align: left;
+        }
+            .authority .signature-line,
+            .authority .signature-label {
+                margin-left: 0;
+            }
+    }
+</style>
