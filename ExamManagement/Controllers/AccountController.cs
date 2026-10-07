@@ -38,8 +38,7 @@ namespace ExamManagement.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model,
-            string? returnUrl = null, int? examId = null)
+        public async Task<IActionResult> Login(LoginViewModel model,string? returnUrl = null, int? examId = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid)

@@ -206,7 +206,7 @@
                 </div>
 
                 <!-- Required Subjects -->
-                <h6 class="fw-bold mb-3">Required Subjects</h6>
+                @* <h6 class="fw-bold mb-3">Required Subjects</h6>
                 <div>
                     @if (Model.EligibilityConfiguration.RequiresPhysics)
                     {
@@ -234,6 +234,24 @@
                                     !Model.EligibilityConfiguration.RequiresMathematics)
                     {
                         <span class="text-muted">No specific subjects specified.</span>
+                    }
+                </div> *@
+
+                <!-- Exam Subjects -->
+                <h6 class="fw-bold mb-3">Exam Subjects</h6>
+                <div>
+                    @if (Model.Subjects != null && Model.Subjects.Any(x => x.IsActive))
+                    {
+                        @foreach (var subject in Model.Subjects
+                                        .Where(x => x.IsActive)
+                                        .OrderBy(x => x.DisplayOrder))
+                        {
+                            <span class="badge bg-primary me-2 mb-2">@subject.SubjectName</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">No subjects configured for this examination.</span>
                     }
                 </div>
             }

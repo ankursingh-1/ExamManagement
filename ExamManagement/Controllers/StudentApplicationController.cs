@@ -368,6 +368,7 @@ namespace ExamManagement.Controllers
             }
 
             var exam = await _context.Exams
+                .Include(x => x.Subjects)
                 .FirstOrDefaultAsync(x =>
                     x.Id == application.ExamId &&
                     x.IsActive);
@@ -377,26 +378,78 @@ namespace ExamManagement.Controllers
                 return NotFound("The selected examination is not available.");
             }
 
+            // LOAD STUDENT SELECTED SUBJECTS
+            var selectedSubjectIds = await _context.StudentApplicationSubjects
+                .Where(x => x.StudentApplicationId == application.Id)
+                .Select(x => x.ExamSubjectId)
+                .ToListAsync();
+
+            // FALLBACK FOR OLD APPLICATIONS
+            // If dynamic subject records do not exist yet,
+            // use the old fixed subject fields.
+            if (!selectedSubjectIds.Any())
+            {
+                selectedSubjectIds = exam.Subjects
+                    .Where(x => x.IsActive)
+                    .Where(x =>
+                        (x.SubjectName.Equals(
+                            "Physics",
+                            StringComparison.OrdinalIgnoreCase)
+                            && application.HasPhysics)
+                        ||
+                        (x.SubjectName.Equals(
+                            "Chemistry",
+                            StringComparison.OrdinalIgnoreCase)
+                            && application.HasChemistry)
+                        ||
+                        (x.SubjectName.Equals(
+                            "Biology",
+                            StringComparison.OrdinalIgnoreCase)
+                            && application.HasBiology)
+                        ||
+                        (x.SubjectName.Equals(
+                            "Mathematics",
+                            StringComparison.OrdinalIgnoreCase)
+                            && application.HasMathematics))
+                    .Select(x => x.Id)
+                    .ToList();
+            }
+
             var model = new StudentQualificationViewModel
             {
                 ApplicationId = application.Id,
                 ExamId = application.ExamId,
+
                 Has10thQualification = application.Has10thQualification,
                 TenthPercentage = application.TenthPercentage,
+
                 TwelfthStatus = application.TwelfthStatus,
                 TwelfthPercentage = application.TwelfthPercentage,
                 TwelfthBoard = application.TwelfthBoard,
                 TwelfthPassingYear = application.TwelfthPassingYear,
+
+                // Dynamic subjects
+                SelectedSubjectIds = selectedSubjectIds,
+
+                // Legacy fields
                 HasPhysics = application.HasPhysics,
                 HasChemistry = application.HasChemistry,
                 HasBiology = application.HasBiology,
                 HasMathematics = application.HasMathematics,
+
                 HasGraduation = application.HasGraduation,
                 GraduationCourse = application.GraduationCourse,
                 GraduationPercentage = application.GraduationPercentage,
                 GraduationPassingYear = application.GraduationPassingYear
             };
+
+            ViewBag.ExamSubjects = exam.Subjects
+                .Where(x => x.IsActive)
+                .OrderBy(x => x.DisplayOrder)
+                .ToList();
+
             ViewBag.ExamName = exam.ExamName;
+
             return View(model);
         }
 
@@ -406,31 +459,32 @@ namespace ExamManagement.Controllers
         public async Task<IActionResult> Qualification(StudentQualificationViewModel model)
         {
             var user = await _userManager.GetUserAsync(User);
-
             if (user == null)
             {
                 return Challenge();
             }
 
+            // GET APPLICATION - USER SPECIFIC
             var application = await _context.StudentApplications
-                .FirstOrDefaultAsync(x =>
-                    x.Id == model.ApplicationId &&
-                    x.UserId == user.Id);
+                .FirstOrDefaultAsync(x => x.Id == model.ApplicationId && x.UserId == user.Id);
 
             if (application == null)
             {
                 return NotFound("Application not found.");
             }
 
-            var exam = await _context.Exams
-                .FirstOrDefaultAsync(x =>
-                    x.Id == application.ExamId &&
-                    x.IsActive);
-
+            // GET EXAM
+            var exam = await _context.Exams .FirstOrDefaultAsync(x => x.Id == application.ExamId && x.IsActive);
             if (exam == null)
             {
                 return NotFound("The selected examination is not available.");
             }
+
+            // LOAD ACTIVE EXAM SUBJECTS
+            var examSubjects = await _context.ExamSubjects
+                .Where(x => x.ExamId == application.ExamId && x.IsActive)
+                .OrderBy(x => x.DisplayOrder)
+                .ToListAsync();
 
             // 12th CONDITIONAL VALIDATION
             // Remove automatic validation errors for
@@ -442,26 +496,49 @@ namespace ExamManagement.Controllers
             if (string.Equals(model.TwelfthStatus,"Passed",StringComparison.OrdinalIgnoreCase))
             {
                 if (!model.TwelfthPercentage.HasValue)
-                { 
-                    ModelState.AddModelError(nameof(model.TwelfthPercentage),"Please enter 12th percentage.");
+                {
+                    ModelState.AddModelError(nameof(model.TwelfthPercentage),
+                        "Please enter 12th percentage.");
                 }
 
                 if (!model.TwelfthPassingYear.HasValue)
                 {
-                    ModelState.AddModelError(nameof(model.TwelfthPassingYear),"Please enter 12th passing year.");
+                    ModelState.AddModelError(nameof(model.TwelfthPassingYear),
+                        "Please enter 12th passing year.");
                 }
+            }
+
+            // DYNAMIC SUBJECT IDs
+            var selectedSubjectIds = model.SelectedSubjectIds
+              .Where(x => x > 0)
+              .Distinct()
+              .ToList();
+
+            // VALIDATE SELECTED SUBJECTS
+            var validSubjectIds = examSubjects
+                .Select(x => x.Id)
+                .ToHashSet();
+
+            var invalidSubjectIds = selectedSubjectIds
+                .Where(x => !validSubjectIds.Contains(x))
+                .ToList();
+
+            if (invalidSubjectIds.Any())
+            {
+                ModelState.AddModelError("","One or more selected subjects are invalid.");
             }
 
             // MODEL VALIDATION
             if (!ModelState.IsValid)
             {
                 ViewBag.ExamName = exam.ExamName;
+                ViewBag.ExamSubjects = examSubjects;
+
                 return View(model);
             }
 
             // 10th
             application.Has10thQualification = model.Has10thQualification ?? false;
-
             application.TenthPercentage = model.TenthPercentage;
 
             // 12th
@@ -470,11 +547,56 @@ namespace ExamManagement.Controllers
             application.TwelfthBoard = model.TwelfthBoard;
             application.TwelfthPassingYear = model.TwelfthPassingYear;
 
-            // SUBJECTS
-            application.HasPhysics = model.HasPhysics;
-            application.HasChemistry = model.HasChemistry;
-            application.HasBiology = model.HasBiology;
-            application.HasMathematics = model.HasMathematics;
+            // DYNAMIC SUBJECTS
+
+            // Remove previous subject selections
+            var existingStudentSubjects = await _context.StudentApplicationSubjects
+                .Where(x => x.StudentApplicationId == application.Id)
+                .ToListAsync();
+
+            if (existingStudentSubjects.Any())
+            {
+                _context.StudentApplicationSubjects.RemoveRange(existingStudentSubjects);
+            }
+
+            // Save selected subjects
+            foreach (var subject in examSubjects
+                .Where(x => selectedSubjectIds.Contains(x.Id)))
+            {
+                _context.StudentApplicationSubjects.Add(
+                    new StudentApplicationSubject
+                    {
+                        StudentApplicationId = application.Id,
+                        ExamSubjectId = subject.Id,
+                        SubjectName = subject.SubjectName,
+                        CreatedAt = DateTime.UtcNow
+                    });
+            }
+
+            // SYNC OLD FIXED SUBJECT FIELDS
+            application.HasPhysics = examSubjects.Any(x =>
+                selectedSubjectIds.Contains(x.Id) &&
+                x.SubjectName.Equals(
+                    "Physics",
+                    StringComparison.OrdinalIgnoreCase));
+
+            application.HasChemistry = examSubjects.Any(x =>
+                selectedSubjectIds.Contains(x.Id) &&
+                x.SubjectName.Equals(
+                    "Chemistry",
+                    StringComparison.OrdinalIgnoreCase));
+
+            application.HasBiology = examSubjects.Any(x =>
+                selectedSubjectIds.Contains(x.Id) &&
+                x.SubjectName.Equals(
+                    "Biology",
+                    StringComparison.OrdinalIgnoreCase));
+
+            application.HasMathematics = examSubjects.Any(x =>
+                selectedSubjectIds.Contains(x.Id) &&
+                x.SubjectName.Equals(
+                    "Mathematics",
+                    StringComparison.OrdinalIgnoreCase));
 
             // GRADUATION
             application.HasGraduation = model.HasGraduation;
@@ -482,11 +604,18 @@ namespace ExamManagement.Controllers
             application.GraduationPercentage = model.GraduationPercentage;
             application.GraduationPassingYear = model.GraduationPassingYear;
 
-            // SAVE
+            // UPDATE TIMESTAMP
             application.UpdatedAt = DateTime.UtcNow;
+
+            // SAVE
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Qualification details saved successfully.";
-            return RedirectToAction(nameof(Documents),new
+
+            TempData["SuccessMessage"] =
+                "Qualification details saved successfully.";
+
+            return RedirectToAction(
+                nameof(Documents),
+                new
                 {
                     applicationId = application.Id
                 });
@@ -531,9 +660,8 @@ namespace ExamManagement.Controllers
             }
 
             var exam = await _context.Exams
-                .FirstOrDefaultAsync(x =>
-                    x.Id == application.ExamId &&
-                    x.IsActive);
+                .Include(x => x.Subjects)
+                .FirstOrDefaultAsync(x => x.Id == application.ExamId && x.IsActive);
 
             if (exam == null)
             {
@@ -596,6 +724,10 @@ namespace ExamManagement.Controllers
                 ApplicationId = application.Id,
                 ExamId = application.ExamId
             };
+            ViewBag.ExamSubjects = exam.Subjects
+             .Where(x => x.IsActive)
+             .OrderBy(x => x.DisplayOrder)
+             .ToList();
             ViewBag.ExamName = exam.ExamName;
             ViewBag.ExistingDocuments = existingDocuments;
             return View(model);
@@ -1098,10 +1230,15 @@ namespace ExamManagement.Controllers
             var documents = await _context.StudentApplicationDocuments
                 .Where(x => x.StudentApplicationId == application.Id)
                 .ToListAsync();
+            var selectedSubjects = await _context.StudentApplicationSubjects
+                .Where(x => x.StudentApplicationId == application.Id)
+                .OrderBy(x => x.Id)
+                .ToListAsync();
             ViewBag.ExamName = exam.ExamName;
             ViewBag.ApplicationFee = exam.ApplicationFee;
             ViewBag.Payment = payment;
             ViewBag.Documents = documents;
+            ViewBag.SelectedSubjects = selectedSubjects;
             return View(application);
         }
 
@@ -1366,12 +1503,17 @@ namespace ExamManagement.Controllers
             var documents = await _context.StudentApplicationDocuments
                 .Where(x => x.StudentApplicationId == application.Id)
                 .ToListAsync();
+            var selectedSubjects = await _context.StudentApplicationSubjects
+                .Where(x => x.StudentApplicationId == application.Id)
+                .OrderBy(x => x.Id)
+                .ToListAsync();
             ViewBag.ExamName = exam.ExamName;
             ViewBag.ExamCode = exam.ExamCode;
             ViewBag.ExamDate = exam.ExamDate;
             ViewBag.ApplicationFee = exam.ApplicationFee;
             ViewBag.Payment = payment;
             ViewBag.Documents = documents;
+            ViewBag.SelectedSubjects = selectedSubjects;
             return View(application);
         }
 

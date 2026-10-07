@@ -236,6 +236,72 @@
                                     <label class="form-check-label" for="mathematics">Mathematics</label>
                                 </div>
                             </div>
+                            <hr class="my-4" />
+                            <h6 class="fw-bold mb-3">Additional Exam Subjects</h6>
+                            <div id="additionalSubjects"></div>
+                            <div class="row mt-2">
+                                <div class="col-md-8">
+                                    <input type="text"id="newSubjectName"class="form-control"placeholder="Enter subject name" />
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button"class="btn btn-outline-primary"onclick="addSubject()">
+                                        <i class="bi bi-plus"></i> Add Subject
+                                    </button>
+                                </div>
+                            </div>
+
+                            <input type="hidden" id="SubjectNames" name="SubjectNames" />
+                            <div class="form-text mt-2">
+                                Physics, Chemistry, Biology and Mathematics are available by default.
+                                Add any additional subject required for this exam.
+                            </div>
+                            <script>
+                                let subjects = [];
+                                function addSubject() 
+                                {
+                                    const input = document.getElementById("newSubjectName");
+                                    const subjectName = input.value.trim();
+                                    if (!subjectName) 
+                                    {
+                                        return;
+                                    }
+                                    const exists = subjects.some( x => x.toLowerCase() === subjectName.toLowerCase());
+                                    if (exists) {
+                                        input.value = "";
+                                        return;
+                                    }
+
+                                    subjects.push(subjectName);
+                                    renderSubjects();
+                                    input.value = "";
+                                    input.focus();
+                                }
+                                function removeSubject(index) 
+                                {
+                                    subjects.splice(index, 1);
+                                    renderSubjects();
+                                }
+                                function renderSubjects() 
+                                {
+                                    const container = document.getElementById("additionalSubjects");
+                                    container.innerHTML = "";
+                                    subjects.forEach((subject, index) => 
+                                    {
+                                        const div = document.createElement("div");
+                                        div.className = "alert alert-light border d-flex justify-content-between align-items-center mb-2";
+                                        div.innerHTML = `
+                                            <span>
+                                                <strong>${subject}</strong>
+                                            </span>
+                                            <button type="button"class="btn btn-sm btn-outline-danger"
+                                                    onclick="removeSubject(${index})">
+                                                Remove
+                                            </button>`;
+                                        container.appendChild(div);
+                                    });
+                                    document.getElementById("SubjectNames").value = subjects.join(",");
+                                }
+                            </script>
                         </div>
                     </div>
                 </div>

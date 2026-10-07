@@ -218,41 +218,19 @@
                         <div>
                             <h6 class="fw-bold mb-3">Required Subjects</h6>
                             <div class="row g-3">
-                                @if (Model.EligibilityConfiguration.RequiresPhysics)
+                                @if (Model.Subjects != null)
                                 {
-                                    <div class="col-md-3">
-                                        <div class="border rounded p-3 text-center">
-                                            <i class="bi bi-check-circle-fill text-success d-block mb-1"></i>
-                                            Physics
+                                    foreach (var subject in Model.Subjects
+                                    .Where(x => x.IsActive)
+                                    .OrderBy(x => x.DisplayOrder))
+                                    {
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3 text-center">
+                                                <i class="bi bi-check-circle-fill text-success d-block mb-1"></i>
+                                                @subject.SubjectName
+                                            </div>
                                         </div>
-                                    </div>
-                                }
-                                @if (Model.EligibilityConfiguration.RequiresChemistry)
-                                {
-                                    <div class="col-md-3">
-                                        <div class="border rounded p-3 text-center">
-                                            <i class="bi bi-check-circle-fill text-success d-block mb-1"></i>
-                                            Chemistry
-                                        </div>
-                                    </div>
-                                }
-                                @if (Model.EligibilityConfiguration.RequiresBiology)
-                                {
-                                    <div class="col-md-3">
-                                        <div class="border rounded p-3 text-center">
-                                            <i class="bi bi-check-circle-fill text-success d-block mb-1"></i>
-                                            Biology
-                                        </div>
-                                    </div>
-                                }
-                                @if (Model.EligibilityConfiguration.RequiresMathematics)
-                                {
-                                    <div class="col-md-3">
-                                        <div class="border rounded p-3 text-center">
-                                            <i class="bi bi-check-circle-fill text-success d-block mb-1"></i>
-                                            Mathematics
-                                        </div>
-                                    </div>
+                                    }
                                 }
                             </div>
                         </div>

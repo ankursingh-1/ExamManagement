@@ -63,5 +63,6 @@ namespace ExamManagement.Models
 
         // Eligibility Configuration
         public ExamEligibility? EligibilityConfiguration { get; set; }
+        public ICollection<ExamSubject> Subjects { get; set; } = new List<ExamSubject>();
     }
 }

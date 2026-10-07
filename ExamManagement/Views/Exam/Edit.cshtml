@@ -215,45 +215,97 @@
 
                         <!-- Required Subjects -->
                         <h6 class="fw-bold mb-3">Required Subjects</h6>
-                        <div class="row">
-
-                            <!-- Physics -->
-                            <div class="col-md-3">
-                                <div class="form-check">
-                                    <input type="checkbox"name="RequiresPhysics"value="true"class="form-check-input"id="physics"
-                                           @(Model.EligibilityConfiguration?.RequiresPhysics == true ? "checked" : "") />
-                                    <label class="form-check-label"for="physics">Physics</label>
-                                </div>
+                        <div class="row" id="examSubjectsContainer">
+                            @if (Model.Subjects != null && Model.Subjects.Any())
+                            {
+                                foreach (var subject in Model.Subjects
+                                .OrderBy(x => x.DisplayOrder))
+                                {
+                                    <div class="col-md-3 mb-3 subject-item"data-subject-name="@subject.SubjectName">
+                                        <div class="form-check">
+                                            <input type="checkbox"name="SelectedSubjectIds"value="@subject.Id"class="form-check-input"
+                                                   id="subject_@subject.Id"
+                                                   @(subject.IsActive ? "checked" : "") />
+                                            <label class="form-check-label"for="subject_@subject.Id">@subject.SubjectName</label>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <hr class="my-4" />
+                        <!-- Add New Subject -->
+                        <h6 class="fw-bold mb-3">Add Exam Subject</h6>
+                        <div id="newSubjectsContainer"></div>
+                        <div class="row mt-2">
+                            <div class="col-md-8">
+                                <input type="text"id="newSubjectName"class="form-control"placeholder="Enter subject name" />
                             </div>
-
-                            <!-- Chemistry -->
-                            <div class="col-md-3">
-                                <div class="form-check">
-                                    <input type="checkbox"name="RequiresChemistry"value="true" class="form-check-input"id="chemistry"
-                                           @(Model.EligibilityConfiguration?.RequiresChemistry == true ? "checked" : "") />
-                                    <label class="form-check-label"for="chemistry">Chemistry</label>
-                                </div>
-                            </div>
-
-                            <!-- Biology -->
-                            <div class="col-md-3">
-                                <div class="form-check">
-                                    <input type="checkbox"name="RequiresBiology"value="true"class="form-check-input"id="biology"
-                                           @(Model.EligibilityConfiguration?.RequiresBiology == true ? "checked" : "") />
-                                    <label class="form-check-label"for="biology">Biology
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Mathematics -->
-                            <div class="col-md-3">
-                                <div class="form-check">
-                                    <input type="checkbox"name="RequiresMathematics"value="true"class="form-check-input"id="mathematics"
-                                           @(Model.EligibilityConfiguration?.RequiresMathematics == true ? "checked" : "") />
-                                    <label class="form-check-label"for="mathematics">Mathematics</label>
-                                </div>
+                            <div class="col-md-4">
+                                <button type="button"class="btn btn-outline-primary"onclick="addNewSubject()">
+                                    <i class="bi bi-plus"></i>
+                                    Add Subject
+                                </button>
                             </div>
                         </div>
+                        <input type="hidden"id="NewSubjectNames"name="NewSubjectNames" />
+                        <div class="form-text mt-2">
+                            Select/unselect existing subjects or add a new subject for this examination.
+                        </div>
+                        <script>
+                            let newSubjects = [];
+                            function addNewSubject() 
+                            {
+                                const input = document.getElementById("newSubjectName");
+                                const subjectName = input.value.trim();
+                                if (!subjectName) 
+                                {
+                                    return;
+                                }
+
+                                // Check existing subject
+                                const existingSubjects = Array.from(document.querySelectorAll(".subject-item")
+                                ).map(x => x.getAttribute("data-subject-name")
+                                        .toLowerCase());
+
+                                // Check newly added subject
+                                const alreadyAdded = newSubjects.some(x => x.toLowerCase() === subjectName.toLowerCase());
+                                if (existingSubjects.includes(subjectName.toLowerCase()) || alreadyAdded) 
+                                {
+                                    input.value = "";
+                                    return;
+                                }
+                                newSubjects.push(subjectName);
+                                renderNewSubjects();
+                                input.value = "";
+                                input.focus();
+                            }
+                            function removeNewSubject(index) 
+                            {
+                                newSubjects.splice(index, 1);
+                                renderNewSubjects();
+                            }
+                            function renderNewSubjects() 
+                            {
+                                const container = document.getElementById("newSubjectsContainer");
+                                container.innerHTML = "";
+                                newSubjects.forEach((subject, index) => 
+                                {
+                                    const div = document.createElement("div");
+                                    div.className = "alert alert-light border d-flex justify-content-between align-items-center mb-2";
+                                    div.innerHTML = `
+                                        <span>
+                                            <strong>${subject}</strong>
+                                        </span>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="removeNewSubject(${index})">
+                                            Remove
+                                        </button>`;
+                                    container.appendChild(div);
+                                });
+                                document.getElementById("NewSubjectNames").value = newSubjects.join(",");
+                            }
+                        </script>
                     </div>
                 </div>
 

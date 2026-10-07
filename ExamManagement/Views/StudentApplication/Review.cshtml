@@ -152,22 +152,45 @@
                     <small class="text-muted">12th Passing Year</small>
                     <div>@Model.TwelfthPassingYear</div>
                 </div>
-                <div class="col-md-3">
-                    <small class="text-muted">Physics</small>
-                    <div>@(Model.HasPhysics ? "Yes" : "No")</div>
+
+                <!-- Subjects -->
+                <div class="col-12">
+                    <small class="text-muted">Subjects</small>
+
+                    <div class="row g-3 mt-1">
+                        @if (ViewBag.SelectedSubjects != null &&
+                                                ((IEnumerable<ExamManagement.Models.StudentApplicationSubject>)
+                                                ViewBag.SelectedSubjects).Any())
+                        {
+                            foreach (var subject in
+                            (IEnumerable<ExamManagement.Models.StudentApplicationSubject>)
+                            ViewBag.SelectedSubjects)
+                            {
+                                <div class="col-md-3 col-sm-6">
+                                    <div class="border rounded p-3 h-100 bg-light">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+
+                                            <span class="fw-semibold">
+                                                @subject.SubjectName
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-light border mb-0">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    No subjects selected.
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <small class="text-muted">Chemistry</small>
-                    <div>@(Model.HasChemistry ? "Yes" : "No")</div>
-                </div>
-                <div class="col-md-3">
-                    <small class="text-muted">Biology</small>
-                    <div>@(Model.HasBiology ? "Yes" : "No")</div>
-                </div>
-                <div class="col-md-3">
-                    <small class="text-muted">Mathematics</small>
-                    <div>@(Model.HasMathematics ? "Yes" : "No")</div>
-                </div>
+
                 <div class="col-md-6">
                     <small class="text-muted">Graduation</small>
                     <div>@(Model.HasGraduation ? "Yes" : "No")</div>

@@ -43,6 +43,9 @@ namespace ExamManagement.ViewModels
         public int? TwelfthPassingYear { get; set; }
 
         // Subjects
+        // Dynamic Exam Subjects
+        public List<int> SelectedSubjectIds { get; set; } = new();
+
         [Display(Name = "Physics")]
         public bool HasPhysics { get; set; }
         [Display(Name = "Chemistry")]
@@ -67,74 +70,39 @@ namespace ExamManagement.ViewModels
         public int? GraduationPassingYear { get; set; }
 
         // CUSTOM VALIDATION
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        public IEnumerable<ValidationResult> Validate(
+            ValidationContext validationContext)
         {
-            // Subject validation
-            if (!HasPhysics)
-            {
-                yield return new ValidationResult("Physics is required.",
-                    new[]
-                    {
-                        nameof(HasPhysics)
-                    });
-            }
-
-            if (!HasChemistry)
-            {
-                yield return new ValidationResult("Chemistry is required.",
-                    new[]
-                    {
-                        nameof(HasChemistry)
-                    });
-            }
-
-            if (!HasBiology && !HasMathematics)
-            {
-                yield return new ValidationResult("Please select either Biology or Mathematics.",
-                    new[]
-                    {
-                        nameof(HasBiology),
-                        nameof(HasMathematics)
-                    });
-            }
-
-            if (HasBiology && HasMathematics)
-            {
-                yield return new ValidationResult("Please select only one: Biology or Mathematics.",
-                    new[]
-                    {
-                        nameof(HasBiology),
-                        nameof(HasMathematics)
-                    });
-            }
-
             // Graduation validation
             if (HasGraduation)
             {
                 if (string.IsNullOrWhiteSpace(GraduationCourse))
                 {
-                    yield return new ValidationResult("Please enter graduation course.",
+                    yield return new ValidationResult(
+                        "Please enter graduation course.",
                         new[]
                         {
-                            nameof(GraduationCourse)
+                    nameof(GraduationCourse)
                         });
                 }
 
                 if (!GraduationPercentage.HasValue)
                 {
-                    yield return new ValidationResult("Please enter graduation percentage.",
+                    yield return new ValidationResult(
+                        "Please enter graduation percentage.",
                         new[]
                         {
-                            nameof(GraduationPercentage)
+                    nameof(GraduationPercentage)
                         });
                 }
 
                 if (!GraduationPassingYear.HasValue)
                 {
-                    yield return new ValidationResult("Please enter graduation passing year.",
+                    yield return new ValidationResult(
+                        "Please enter graduation passing year.",
                         new[]
                         {
-                            nameof(GraduationPassingYear)
+                    nameof(GraduationPassingYear)
                         });
                 }
             }

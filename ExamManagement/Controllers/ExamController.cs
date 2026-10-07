@@ -58,6 +58,40 @@ namespace ExamManagement.Controllers
             _context.Exams.Add(model);
             await _context.SaveChangesAsync();
 
+            // Save Exam Subjects
+            var subjectNames = Request.Form["SubjectNames"]
+                .ToString()
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var defaultSubjects = new[]
+            {
+                 "Physics",
+                 "Chemistry",
+                 "Biology",
+                 "Mathematics"
+            };
+
+            var finalSubjects = defaultSubjects
+                .Concat(subjectNames)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            for (int i = 0; i < finalSubjects.Count; i++)
+            {
+                _context.ExamSubjects.Add(new ExamSubject
+                {
+                    ExamId = model.Id,
+                    SubjectName = finalSubjects[i],
+                    DisplayOrder = i + 1,
+                    IsActive = true
+                });
+            }
+            await _context.SaveChangesAsync();
+
             // Create Eligibility Configuration
             var eligibility = new ExamEligibility
             {
@@ -92,8 +126,8 @@ namespace ExamManagement.Controllers
         {
             var exam = await _context.Exams
                 .Include(x => x.EligibilityConfiguration)
+                .Include(x => x.Subjects)
                 .FirstOrDefaultAsync(x => x.Id == id);
-
             if (exam == null)
             {
                 return NotFound();
@@ -107,7 +141,9 @@ namespace ExamManagement.Controllers
         {
             var exam = await _context.Exams
                 .Include(x => x.EligibilityConfiguration)
+                .Include(x => x.Subjects)
                 .FirstOrDefaultAsync(x => x.Id == id);
+
             if (exam == null)
             {
                 return NotFound();
@@ -118,15 +154,22 @@ namespace ExamManagement.Controllers
         // POST: /Exam/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,Exam model)
+        public async Task<IActionResult> Edit(int id, Exam model)
         {
             if (id != model.Id)
             {
                 return NotFound();
             }
+
             ValidateExam(model);
+
             if (!ModelState.IsValid)
             {
+                model.Subjects = await _context.ExamSubjects
+                    .Where(x => x.ExamId == id)
+                    .OrderBy(x => x.DisplayOrder)
+                    .ToListAsync();
+
                 return View(model);
             }
 
@@ -138,14 +181,29 @@ namespace ExamManagement.Controllers
                 return NotFound();
             }
 
+            // Check duplicate exam code
             var duplicateCode = await _context.Exams
-                .AnyAsync(x => x.ExamCode == model.ExamCode &&  x.Id != id);
+                .AnyAsync(x => x.ExamCode == model.ExamCode && x.Id != id);
 
             if (duplicateCode)
             {
-                ModelState.AddModelError("ExamCode", "This exam code already exists.");
+                ModelState.AddModelError(
+                    "ExamCode",
+                    "This exam code already exists."
+                );
+
+                model.Subjects = await _context.ExamSubjects
+                    .Where(x => x.ExamId == id)
+                    .OrderBy(x => x.DisplayOrder)
+                    .ToListAsync();
+
                 return View(model);
             }
+
+            // =====================================================
+            // UPDATE EXAM DETAILS
+            // =====================================================
+
             exam.ExamName = model.ExamName;
             exam.ExamCode = model.ExamCode;
             exam.ExamType = model.ExamType;
@@ -159,34 +217,185 @@ namespace ExamManagement.Controllers
             exam.Eligibility = model.Eligibility;
             exam.Instructions = model.Instructions;
             exam.UpdatedAt = DateTime.UtcNow;
-            // Update Eligibility Configuration
+
+
+            // =====================================================
+            // UPDATE ELIGIBILITY CONFIGURATION
+            // =====================================================
+
             var eligibility = await _context.ExamEligibilities
                 .FirstOrDefaultAsync(x => x.ExamId == id);
+
             if (eligibility == null)
             {
                 eligibility = new ExamEligibility
                 {
                     ExamId = id
                 };
+
                 _context.ExamEligibilities.Add(eligibility);
             }
-            // Qualification
-            eligibility.Requires10th = Request.Form["Requires10th"] == "true";
-            eligibility.Requires12th = Request.Form["Requires12th"] == "true";
-            eligibility.RequiresGraduation = Request.Form["RequiresGraduation"] == "true";
-            // 12th Status
-            eligibility.Allow12thPassed = Request.Form["Allow12thPassed"] == "true";
-            eligibility.Allow12thAppearing = Request.Form["Allow12thAppearing"] == "true";
-            eligibility.Allow12thResultAwaited = Request.Form["Allow12thResultAwaited"] == "true";
-            // Subjects
-            eligibility.RequiresPhysics = Request.Form["RequiresPhysics"] == "true";
-            eligibility.RequiresChemistry = Request.Form["RequiresChemistry"] == "true";
-            eligibility.RequiresBiology = Request.Form["RequiresBiology"] == "true";
-            eligibility.RequiresMathematics = Request.Form["RequiresMathematics"] == "true";
-            // Minimum Percentage
-            var minimumPercentage = Request.Form["MinimumPercentage"].ToString();
 
-            if (decimal.TryParse(minimumPercentage,out decimal percentage))
+            // Qualification
+            eligibility.Requires10th =
+                Request.Form["Requires10th"] == "true";
+
+            eligibility.Requires12th =
+                Request.Form["Requires12th"] == "true";
+
+            eligibility.RequiresGraduation =
+                Request.Form["RequiresGraduation"] == "true";
+
+
+            // 12th Status
+            eligibility.Allow12thPassed =
+                Request.Form["Allow12thPassed"] == "true";
+
+            eligibility.Allow12thAppearing =
+                Request.Form["Allow12thAppearing"] == "true";
+
+            eligibility.Allow12thResultAwaited =
+                Request.Form["Allow12thResultAwaited"] == "true";
+
+
+            // =====================================================
+            // UPDATE EXAM SUBJECTS
+            // =====================================================
+
+            // Existing selected subjects
+            var selectedSubjectIds = Request.Form["SelectedSubjectIds"]
+                .Select(x =>
+                    int.TryParse(x, out var subjectId)
+                        ? subjectId
+                        : 0)
+                .Where(x => x > 0)
+                .ToHashSet();
+
+
+            // New subjects added from Edit page
+            var newSubjectNames = Request.Form["NewSubjectNames"]
+                .ToString()
+                .Split(
+                    ',',
+                    StringSplitOptions.RemoveEmptyEntries
+                )
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+
+            // Load all existing subjects for this exam
+            var existingSubjects = await _context.ExamSubjects
+                .Where(x => x.ExamId == id)
+                .OrderBy(x => x.DisplayOrder)
+                .ToListAsync();
+
+
+            // Activate / deactivate existing subjects
+            foreach (var subject in existingSubjects)
+            {
+                subject.IsActive =
+                    selectedSubjectIds.Contains(subject.Id);
+            }
+
+
+            // =====================================================
+            // ADD NEW SUBJECTS
+            // =====================================================
+
+            var nextDisplayOrder = existingSubjects.Any()
+                ? existingSubjects.Max(x => x.DisplayOrder) + 1
+                : 1;
+
+
+            foreach (var subjectName in newSubjectNames)
+            {
+                // Check whether subject already exists
+                var existingSubject = existingSubjects
+                    .FirstOrDefault(x =>
+                        x.SubjectName.Equals(
+                            subjectName,
+                            StringComparison.OrdinalIgnoreCase
+                        ));
+
+
+                if (existingSubject != null)
+                {
+                    // Existing inactive subject -> activate it
+                    existingSubject.IsActive = true;
+
+                    continue;
+                }
+
+
+                // Create new subject
+                _context.ExamSubjects.Add(new ExamSubject
+                {
+                    ExamId = id,
+                    SubjectName = subjectName,
+                    DisplayOrder = nextDisplayOrder++,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+
+            // =====================================================
+            // SYNC FIXED SUBJECT ELIGIBILITY
+            // =====================================================
+
+            eligibility.RequiresPhysics =
+                existingSubjects.Any(x =>
+                    x.SubjectName.Equals(
+                        "Physics",
+                        StringComparison.OrdinalIgnoreCase
+                    ) &&
+                    x.IsActive
+                );
+
+
+            eligibility.RequiresChemistry =
+                existingSubjects.Any(x =>
+                    x.SubjectName.Equals(
+                        "Chemistry",
+                        StringComparison.OrdinalIgnoreCase
+                    ) &&
+                    x.IsActive
+                );
+
+
+            eligibility.RequiresBiology =
+                existingSubjects.Any(x =>
+                    x.SubjectName.Equals(
+                        "Biology",
+                        StringComparison.OrdinalIgnoreCase
+                    ) &&
+                    x.IsActive
+                );
+
+
+            eligibility.RequiresMathematics =
+                existingSubjects.Any(x =>
+                    x.SubjectName.Equals(
+                        "Mathematics",
+                        StringComparison.OrdinalIgnoreCase
+                    ) &&
+                    x.IsActive
+                );
+
+
+            // =====================================================
+            // MINIMUM PERCENTAGE
+            // =====================================================
+
+            var minimumPercentage =
+                Request.Form["MinimumPercentage"].ToString();
+
+
+            if (decimal.TryParse(
+                minimumPercentage,
+                out decimal percentage))
             {
                 eligibility.MinimumPercentage = percentage;
             }
@@ -194,8 +403,19 @@ namespace ExamManagement.Controllers
             {
                 eligibility.MinimumPercentage = null;
             }
+
+
+            // =====================================================
+            // SAVE CHANGES
+            // =====================================================
+
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Exam updated successfully.";
+
+
+            TempData["SuccessMessage"] =
+                "Exam updated successfully.";
+
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -245,6 +465,7 @@ namespace ExamManagement.Controllers
         {
             var exam = await _context.Exams
                 .Include(x => x.EligibilityConfiguration)
+                .Include(x => x.Subjects)
                 .FirstOrDefaultAsync(x => x.Id == id && x.IsActive);
             if (exam == null)
             {

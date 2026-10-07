@@ -7,7 +7,7 @@
 <div class="container-fluid py-4">
     <!-- Page Header -->
     <div class="mb-4">
-        <h2 class="fw-bold mb-1">Student Application</h2>
+        <h2 class="fw-bold mb-1">Application</h2>
         <p class="text-muted mb-0">@ViewBag.ExamName</p>
     </div>
 
@@ -137,49 +137,28 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <p class="text-muted small mb-4">Select the subjects studied by the student.</p>
+                        <p class="text-muted small mb-4">
+                            Select the subjects studied by the student.
+                        </p>
                         <div class="row g-3">
-                            <div class="col-md-3">
-                                <div class="border rounded p-3 h-100">
-                                    <div class="form-check">
-                                        <input asp-for="HasPhysics"class="form-check-input"type="checkbox" />
-                                        <label asp-for="HasPhysics"class="form-check-label fw-semibold"></label>
+                            @if (ViewBag.ExamSubjects != null)
+                            {
+                                foreach (var subject in ViewBag.ExamSubjects)
+                                {
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 h-100">
+                                            <div class="form-check">
+                                                <input type="checkbox"class="form-check-input exam-subject-checkbox"
+                                                       name="SelectedSubjectIds"value="@subject.Id"
+                                                       id="subject_@subject.Id"
+                                                       @(Model.SelectedSubjectIds.Contains(subject.Id) ? "checked" : "") />
+                                                <label class="form-check-label fw-semibold"for="subject_@subject.Id">@subject.SubjectName</label>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="border rounded p-3 h-100">
-                                    <div class="form-check">
-                                        <input asp-for="HasChemistry"class="form-check-input"type="checkbox" />
-                                        <label asp-for="HasChemistry"
-                                               class="form-check-label fw-semibold">
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="border rounded p-3 h-100">
-                                    <div class="form-check">
-                                        <input asp-for="HasBiology"class="form-check-input"type="checkbox" />
-                                        <label asp-for="HasBiology"
-                                               class="form-check-label fw-semibold">
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="border rounded p-3 h-100">
-                                    <div class="form-check">
-                                        <input asp-for="HasMathematics"class="form-check-input"type="checkbox" />
-                                        <label asp-for="HasMathematics"
-                                               class="form-check-label fw-semibold">
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
+                                }
+                            }
                         </div>
-
-                        <!-- Subject Validation -->
                         <div id="subjectValidation"class="text-danger small fw-semibold mt-3"></div>
                     </div>
                 </div>
@@ -314,45 +293,7 @@
                         twelfthPassingYear.classList.remove("input-validation-error");
                     }
                 });
-            }
-
-            // SUBJECT VALIDATION
-            form.addEventListener("submit", function (event) {
-                const physics = document.getElementById("HasPhysics").checked;
-                const chemistry = document.getElementById("HasChemistry").checked;
-                const biology = document.getElementById("HasBiology").checked;
-                const mathematics = document.getElementById("HasMathematics").checked;
-                const subjectValidation = document.getElementById("subjectValidation");
-                subjectValidation.innerHTML = "";
-
-                // Physics compulsory
-                if (!physics) {
-                    subjectValidation.innerHTML = "Physics is required.";
-                    event.preventDefault();
-                    return;
-                }
-
-                // Chemistry compulsory
-                if (!chemistry) {
-                    subjectValidation.innerHTML = "Chemistry is required.";
-                    event.preventDefault();
-                    return;
-                }
-
-                // Biology OR Mathematics
-                if (!biology && !mathematics) {
-                    subjectValidation.innerHTML = "Please select either Biology or Mathematics.";
-                    event.preventDefault();
-                    return;
-                }
-
-                // Cannot select both
-                if (biology && mathematics) {
-                    subjectValidation.innerHTML = "Please select only one: Biology or Mathematics.";
-                    event.preventDefault();
-                    return;
-                }
-            });
+            }            
         });
     </script>
 }
