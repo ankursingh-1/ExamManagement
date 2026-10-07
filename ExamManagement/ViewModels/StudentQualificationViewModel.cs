@@ -70,40 +70,30 @@ namespace ExamManagement.ViewModels
         public int? GraduationPassingYear { get; set; }
 
         // CUSTOM VALIDATION
-        public IEnumerable<ValidationResult> Validate(
-            ValidationContext validationContext)
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             // Graduation validation
             if (HasGraduation)
             {
                 if (string.IsNullOrWhiteSpace(GraduationCourse))
                 {
-                    yield return new ValidationResult(
-                        "Please enter graduation course.",
+                    yield return new ValidationResult("Please enter graduation course.",
                         new[]
-                        {
-                    nameof(GraduationCourse)
-                        });
+                        {nameof(GraduationCourse)});
                 }
 
                 if (!GraduationPercentage.HasValue)
                 {
-                    yield return new ValidationResult(
-                        "Please enter graduation percentage.",
+                    yield return new ValidationResult("Please enter graduation percentage.",
                         new[]
-                        {
-                    nameof(GraduationPercentage)
-                        });
+                        {nameof(GraduationPercentage)});
                 }
 
                 if (!GraduationPassingYear.HasValue)
                 {
-                    yield return new ValidationResult(
-                        "Please enter graduation passing year.",
+                    yield return new ValidationResult("Please enter graduation passing year.",
                         new[]
-                        {
-                    nameof(GraduationPassingYear)
-                        });
+                        {nameof(GraduationPassingYear)});
                 }
             }
         }

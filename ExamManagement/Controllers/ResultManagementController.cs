@@ -18,32 +18,24 @@ namespace ExamManagement.Controllers
             _context = context;
         }
 
-        // =========================================================
         // RESULT MANAGEMENT
-        // =========================================================
         [HttpGet]
-        public async Task<IActionResult> Index(
-            int? examId,
-            string? category)
+        public async Task<IActionResult> Index(int? examId,string? category)
         {
             var model = new ResultManagementViewModel
             {
                 Exams = await _context.Exams
                     .OrderByDescending(x => x.Id)
                     .ToListAsync(),
-
                 SelectedExamId = examId,
                 SelectedCategory = category
             };
-
             if (!examId.HasValue)
             {
                 return View(model);
             }
-
             model.SelectedExam = await _context.Exams
                 .FirstOrDefaultAsync(x => x.Id == examId.Value);
-
             if (model.SelectedExam == null)
             {
                 TempData["ErrorMessage"] = "Exam not found.";
@@ -52,70 +44,49 @@ namespace ExamManagement.Controllers
 
             // CUT-OFFS
             model.Cutoffs = await _context.ExamCutoffs
-                .Where(x =>
-                    x.ExamId == examId.Value &&
-                    x.IsActive)
+                .Where(x => x.ExamId == examId.Value && x.IsActive)
                 .OrderBy(x => x.Category)
                 .ToListAsync();
 
             // APPROVED APPLICATIONS
             var applicationsQuery = _context.StudentApplications
-                .Where(x =>
-                    x.ExamId == examId.Value &&
-                    x.Status == "Approved");
-
+                .Where(x => x.ExamId == examId.Value && x.Status == "Approved");
             if (!string.IsNullOrWhiteSpace(category))
             {
                 var selectedCategory = category.Trim();
-
-                if (selectedCategory.Equals(
-                        "General",
-                        StringComparison.OrdinalIgnoreCase))
+                if (selectedCategory.Equals("General",StringComparison.OrdinalIgnoreCase))
                 {
                     applicationsQuery = applicationsQuery
-                        .Where(x =>
-                            string.IsNullOrWhiteSpace(x.Category) ||
-                            x.Category == "General");
+                        .Where(x =>string.IsNullOrWhiteSpace(x.Category) || x.Category == "General");
                 }
                 else
                 {
                     applicationsQuery = applicationsQuery
-                        .Where(x =>
-                            x.Category == selectedCategory);
+                        .Where(x => x.Category == selectedCategory);
                 }
             }
-
             model.Applications = await applicationsQuery
                 .OrderBy(x => x.ApplicationNumber)
                 .ToListAsync();
 
             // RESULTS
             model.Results = await _context.ExamResults
-                .Where(x =>
-                    x.ExamId == examId.Value)
+                .Where(x => x.ExamId == examId.Value)
                 .ToListAsync();
 
             // RESULT SUBJECTS
             model.ResultSubjects = await _context.ExamResultSubjects
-                .Where(x =>
-                    x.ExamResult != null &&
-                    x.ExamResult.ExamId == examId.Value)
+                .Where(x => x.ExamResult != null && x.ExamResult.ExamId == examId.Value)
                 .ToListAsync();
-
             return View(model);
         }
 
-        // =========================================================
         // DOWNLOAD MARKS EXCEL TEMPLATE
-        // =========================================================
         [HttpGet]
-        public async Task<IActionResult> DownloadMarksTemplate(
-            int examId,
-            string? category)
+        public async Task<IActionResult> DownloadMarksTemplate(int examId,string? category)
         {
             var exam = await _context.Exams
                 .FirstOrDefaultAsync(x => x.Id == examId);
-
             if (exam == null)
             {
                 return NotFound("Exam not found.");
@@ -123,42 +94,28 @@ namespace ExamManagement.Controllers
 
             // APPROVED APPLICATIONS
             var applicationsQuery = _context.StudentApplications
-                .Where(x =>
-                    x.ExamId == examId &&
-                    x.Status == "Approved");
-
+                .Where(x => x.ExamId == examId && x.Status == "Approved");
             if (!string.IsNullOrWhiteSpace(category))
             {
                 var selectedCategory = category.Trim();
-
-                if (selectedCategory.Equals(
-                        "General",
-                        StringComparison.OrdinalIgnoreCase))
+                if (selectedCategory.Equals("General",StringComparison.OrdinalIgnoreCase))
                 {
                     applicationsQuery = applicationsQuery
-                        .Where(x =>
-                            string.IsNullOrWhiteSpace(x.Category) ||
-                            x.Category == "General");
+                        .Where(x => string.IsNullOrWhiteSpace(x.Category) || x.Category == "General");
                 }
                 else
                 {
                     applicationsQuery = applicationsQuery
-                        .Where(x =>
-                            x.Category == selectedCategory);
+                        .Where(x => x.Category == selectedCategory);
                 }
             }
-
             var applications = await applicationsQuery
                 .OrderBy(x => x.ApplicationNumber)
                 .ToListAsync();
-
             if (!applications.Any())
             {
-                TempData["ErrorMessage"] =
-                    "No approved students found for this exam.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "No approved students found for this exam.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
                         examId,
@@ -181,232 +138,117 @@ namespace ExamManagement.Controllers
 
             using var workbook = new XLWorkbook();
 
-            // =====================================================
             // SHEET 1 - OVERALL MARKS
-            // =====================================================
-            var overallSheet =
-                workbook.Worksheets.Add("Overall Marks");
-
-            overallSheet.Cell(1, 1).Value =
-                $"{exam.ExamName} - Overall Marks";
-
+            var overallSheet = workbook.Worksheets.Add("Overall Marks");
+            overallSheet.Cell(1, 1).Value = $"{exam.ExamName} - Overall Marks";
             overallSheet.Range(1, 1, 1, 5).Merge();
-
             overallSheet.Cell(1, 1).Style.Font.Bold = true;
             overallSheet.Cell(1, 1).Style.Font.FontSize = 16;
-            overallSheet.Cell(1, 1)
-                .Style.Alignment.Horizontal =
-                XLAlignmentHorizontalValues.Center;
-
-            overallSheet.Cell(3, 1).Value =
-                "Application Number";
-
-            overallSheet.Cell(3, 2).Value =
-                "Student Name";
-
-            overallSheet.Cell(3, 3).Value =
-                "Category";
-
-            overallSheet.Cell(3, 4).Value =
-                "Total Marks";
-
-            overallSheet.Cell(3, 5).Value =
-                "Obtained Marks";
-
-            var overallHeader =
-                overallSheet.Range(3, 1, 3, 5);
-
+            overallSheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            overallSheet.Cell(3, 1).Value = "Application Number";
+            overallSheet.Cell(3, 2).Value = "Student Name";
+            overallSheet.Cell(3, 3).Value = "Category";
+            overallSheet.Cell(3, 4).Value = "Total Marks";
+            overallSheet.Cell(3, 5).Value = "Obtained Marks";
+            var overallHeader = overallSheet.Range(3, 1, 3, 5);
             overallHeader.Style.Font.Bold = true;
 
-            // =====================================================
             // SHEET 2 - SUBJECT MARKS
-            // =====================================================
-            var subjectSheet =
-                workbook.Worksheets.Add("Subject Marks");
-
-            subjectSheet.Cell(1, 1).Value =
-                $"{exam.ExamName} - Subject Marks";
-
+            var subjectSheet = workbook.Worksheets.Add("Subject Marks");
+            subjectSheet.Cell(1, 1).Value = $"{exam.ExamName} - Subject Marks";
             subjectSheet.Range(1, 1, 1, 5).Merge();
-
             subjectSheet.Cell(1, 1).Style.Font.Bold = true;
             subjectSheet.Cell(1, 1).Style.Font.FontSize = 16;
-            subjectSheet.Cell(1, 1)
-                .Style.Alignment.Horizontal =
-                XLAlignmentHorizontalValues.Center;
-
-            subjectSheet.Cell(3, 1).Value =
-                "Application Number";
-
-            subjectSheet.Cell(3, 2).Value =
-                "Student Name";
-
-            subjectSheet.Cell(3, 3).Value =
-                "Subject";
-
-            subjectSheet.Cell(3, 4).Value =
-                "Total Marks";
-
-            subjectSheet.Cell(3, 5).Value =
-                "Obtained Marks";
-
-            var subjectHeader =
-                subjectSheet.Range(3, 1, 3, 5);
-
+            subjectSheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            subjectSheet.Cell(3, 1).Value = "Application Number";
+            subjectSheet.Cell(3, 2).Value = "Student Name";
+            subjectSheet.Cell(3, 3).Value = "Subject";
+            subjectSheet.Cell(3, 4).Value = "Total Marks";
+            subjectSheet.Cell(3, 5).Value = "Obtained Marks";
+            var subjectHeader = subjectSheet.Range(3, 1, 3, 5);
             subjectHeader.Style.Font.Bold = true;
 
-            // =====================================================
             // SUBJECT ROWS
-            // =====================================================
             int subjectRow = 4;
-
             foreach (var application in applications)
             {
                 var selectedSubjects = studentSubjects
-                    .Where(x =>
-                        x.StudentApplicationId ==
-                        application.Id)
+                    .Where(x => x.StudentApplicationId == application.Id)
                     .OrderBy(x => x.ExamSubjectId)
                     .ToList();
-
                 foreach (var studentSubject in selectedSubjects)
                 {
-                    subjectSheet.Cell(subjectRow, 1).Value =
-                        application.ApplicationNumber;
-
-                    subjectSheet.Cell(subjectRow, 2).Value =
-                        application.FullName;
-
-                    subjectSheet.Cell(subjectRow, 3).Value =
-                        studentSubject.SubjectName;
-
+                    subjectSheet.Cell(subjectRow, 1).Value = application.ApplicationNumber;
+                    subjectSheet.Cell(subjectRow, 2).Value = application.FullName;
+                    subjectSheet.Cell(subjectRow, 3).Value = studentSubject.SubjectName;
                     // Every subject = 100 marks
-                    subjectSheet.Cell(subjectRow, 4).Value =
-                        100;
-
+                    subjectSheet.Cell(subjectRow, 4).Value = 100;
                     // Admin manually enters obtained marks
                     subjectSheet.Cell(subjectRow, 5).Clear();
-
                     subjectRow++;
                 }
             }
 
-            // =====================================================
             // OVERALL ROWS
-            // =====================================================
             int overallRow = 4;
-
             foreach (var application in applications)
             {
-                overallSheet.Cell(overallRow, 1).Value =
-                    application.ApplicationNumber;
-
-                overallSheet.Cell(overallRow, 2).Value =
-                    application.FullName;
-
-                overallSheet.Cell(overallRow, 3).Value =
-                    string.IsNullOrWhiteSpace(
-                        application.Category)
+                overallSheet.Cell(overallRow, 1).Value = application.ApplicationNumber;
+                overallSheet.Cell(overallRow, 2).Value = application.FullName;
+                overallSheet.Cell(overallRow, 3).Value = string.IsNullOrWhiteSpace(application.Category)
                         ? "General"
                         : application.Category;
-
                 var selectedSubjects = studentSubjects
-                    .Where(x =>
-                        x.StudentApplicationId ==
-                        application.Id)
+                    .Where(x => x.StudentApplicationId == application.Id)
                     .ToList();
 
                 // Every selected subject = 100
-                var totalMarks =
-                    selectedSubjects.Count * 100;
-
-                overallSheet.Cell(overallRow, 4).Value =
-                    totalMarks;
-
+                var totalMarks = selectedSubjects.Count * 100;
+                overallSheet.Cell(overallRow, 4).Value = totalMarks;
                 // Automatically calculate obtained marks
                 // from Subject Marks sheet.
                 overallSheet.Cell(overallRow, 5)
-                    .FormulaA1 =
-                    $"=SUMIF('Subject Marks'!A:A,A{overallRow},'Subject Marks'!E:E)";
-
+                    .FormulaA1 = $"=SUMIF('Subject Marks'!A:A,A{overallRow},'Subject Marks'!E:E)";
                 overallRow++;
             }
 
-            // =====================================================
             // FORMATTING
-            // =====================================================
-            overallSheet.Columns()
-                .AdjustToContents();
-
-            subjectSheet.Columns()
-                .AdjustToContents();
-
+            overallSheet.Columns().AdjustToContents();
+            subjectSheet.Columns().AdjustToContents();
             overallSheet.Column(1).Width = 25;
             overallSheet.Column(2).Width = 25;
             overallSheet.Column(3).Width = 15;
             overallSheet.Column(4).Width = 15;
             overallSheet.Column(5).Width = 18;
-
             subjectSheet.Column(1).Width = 25;
             subjectSheet.Column(2).Width = 25;
             subjectSheet.Column(3).Width = 25;
             subjectSheet.Column(4).Width = 15;
             subjectSheet.Column(5).Width = 18;
+            overallSheet.SheetView.FreezeRows(3);
+            subjectSheet.SheetView.FreezeRows(3);
+            overallSheet.Column(4).Style.NumberFormat.Format = "0";
+            overallSheet.Column(5).Style.NumberFormat.Format = "0";
+            subjectSheet.Column(4).Style.NumberFormat.Format = "0";
+            subjectSheet.Column(5).Style.NumberFormat.Format = "0";
 
-            overallSheet.SheetView
-                .FreezeRows(3);
-
-            subjectSheet.SheetView
-                .FreezeRows(3);
-
-            overallSheet.Column(4)
-                .Style.NumberFormat.Format = "0";
-
-            overallSheet.Column(5)
-                .Style.NumberFormat.Format = "0";
-
-            subjectSheet.Column(4)
-                .Style.NumberFormat.Format = "0";
-
-            subjectSheet.Column(5)
-                .Style.NumberFormat.Format = "0";
-
-            // =====================================================
             // DOWNLOAD
-            // =====================================================
             using var stream = new MemoryStream();
-
             workbook.SaveAs(stream);
-
             stream.Position = 0;
-
-            var fileName =
-                $"MarksTemplate-{exam.ExamName}-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-
-            return File(
-                stream.ToArray(),
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                fileName);
+            var fileName = $"MarksTemplate-{exam.ExamName}-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+            return File(stream.ToArray(),"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",fileName);
         }
 
-        // =========================================================
         // UPLOAD MARKS EXCEL
-        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadMarksExcel(
-            int examId,
-            string? category,
-            IFormFile excelFile)
+        public async Task<IActionResult> UploadMarksExcel(int examId,string? category,IFormFile excelFile)
         {
-            if (excelFile == null ||
-                excelFile.Length == 0)
+            if (excelFile == null || excelFile.Length == 0)
             {
-                TempData["ErrorMessage"] =
-                    "Please select an Excel file.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Please select an Excel file.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
                         examId,
@@ -415,448 +257,259 @@ namespace ExamManagement.Controllers
             }
 
             if (!Path.GetExtension(excelFile.FileName)
-                .Equals(
-                    ".xlsx",
+                .Equals(".xlsx",
                     StringComparison.OrdinalIgnoreCase))
             {
-                TempData["ErrorMessage"] =
-                    "Only .xlsx Excel files are allowed.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Only .xlsx Excel files are allowed.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
                         examId,
                         category
                     });
             }
-
             var exam = await _context.Exams
                 .FirstOrDefaultAsync(x => x.Id == examId);
-
             if (exam == null)
             {
                 return NotFound("Exam not found.");
             }
-
             using var stream = new MemoryStream();
-
             await excelFile.CopyToAsync(stream);
-
             stream.Position = 0;
-
-            using var workbook =
-                new XLWorkbook(stream);
-
-            if (!workbook.Worksheets.Contains(
-                    "Overall Marks") ||
-                !workbook.Worksheets.Contains(
-                    "Subject Marks"))
+            using var workbook = new XLWorkbook(stream);
+            if (!workbook.Worksheets.Contains("Overall Marks") || !workbook.Worksheets.Contains( "Subject Marks"))
             {
-                TempData["ErrorMessage"] =
-                    "Invalid Excel file. Both 'Overall Marks' and 'Subject Marks' sheets are required.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Invalid Excel file. Both 'Overall Marks' and 'Subject Marks' sheets are required.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
                         examId,
                         category
                     });
             }
-
-            var overallSheet =
-                workbook.Worksheet("Overall Marks");
-
-            var subjectSheet =
-                workbook.Worksheet("Subject Marks");
-
+            var overallSheet = workbook.Worksheet("Overall Marks");
+            var subjectSheet = workbook.Worksheet("Subject Marks");
             var errors = new List<string>();
-
             int overallSuccess = 0;
             int subjectSuccess = 0;
 
-            // =====================================================
             // 1. SUBJECT MARKS
-            // =====================================================
-            //
             // Subject marks are the source of truth.
             // Overall result will be recalculated from them.
-            //
-            int subjectLastRow =
-                subjectSheet.LastRowUsed()?.RowNumber() ?? 0;
+            int subjectLastRow = subjectSheet.LastRowUsed()?.RowNumber() ?? 0;
 
             for (int row = 4;
                  row <= subjectLastRow;
                  row++)
             {
-                var applicationNumber =
-                    subjectSheet.Cell(row, 1)
+                var applicationNumber = subjectSheet.Cell(row, 1)
                         .GetString()
                         .Trim();
-
-                if (string.IsNullOrWhiteSpace(
-                        applicationNumber))
+                if (string.IsNullOrWhiteSpace(applicationNumber))
                 {
                     continue;
                 }
-
-                var subjectName =
-                    subjectSheet.Cell(row, 3)
+                var subjectName = subjectSheet.Cell(row, 3)
                         .GetString()
                         .Trim();
-
-                if (string.IsNullOrWhiteSpace(
-                        subjectName))
+                if (string.IsNullOrWhiteSpace(subjectName))
                 {
-                    errors.Add(
-                        $"Subject row {row}: Subject is required.");
-
+                    errors.Add($"Subject row {row}: Subject is required.");
                     continue;
                 }
-
                 if (!subjectSheet.Cell(row, 4)
                     .TryGetValue<decimal>(
                         out var totalMarks))
                 {
-                    errors.Add(
-                        $"Subject row {row}: Total Marks is invalid.");
-
+                    errors.Add($"Subject row {row}: Total Marks is invalid.");
                     continue;
                 }
-
                 if (!subjectSheet.Cell(row, 5)
-                    .TryGetValue<decimal>(
-                        out var obtainedMarks))
+                    .TryGetValue<decimal>(out var obtainedMarks))
                 {
-                    errors.Add(
-                        $"Subject row {row}: Obtained Marks is required.");
-
+                    errors.Add($"Subject row {row}: Obtained Marks is required.");
                     continue;
                 }
-
                 if (totalMarks <= 0)
                 {
-                    errors.Add(
-                        $"Subject row {row}: Total Marks must be greater than zero.");
-
+                    errors.Add($"Subject row {row}: Total Marks must be greater than zero.");
                     continue;
                 }
-
-                if (obtainedMarks < 0 ||
-                    obtainedMarks > totalMarks)
+                if (obtainedMarks < 0 || obtainedMarks > totalMarks)
                 {
-                    errors.Add(
-                        $"Subject row {row}: Obtained Marks must be between 0 and Total Marks.");
-
+                    errors.Add($"Subject row {row}: Obtained Marks must be between 0 and Total Marks.");
                     continue;
                 }
-
                 // FIND APPLICATION
-                var application =
-                    await _context.StudentApplications
+                var application = await _context.StudentApplications
                         .FirstOrDefaultAsync(x =>
-                            x.ApplicationNumber ==
-                                applicationNumber &&
+                            x.ApplicationNumber == applicationNumber &&
                             x.ExamId == examId &&
                             x.Status == "Approved");
 
                 if (application == null)
                 {
-                    errors.Add(
-                        $"Subject row {row}: Application '{applicationNumber}' not found.");
-
+                    errors.Add($"Subject row {row}: Application '{applicationNumber}' not found.");
                     continue;
                 }
 
                 // CATEGORY VALIDATION
                 if (!string.IsNullOrWhiteSpace(category))
                 {
-                    var applicationCategory =
-                        string.IsNullOrWhiteSpace(
-                            application.Category)
+                    var applicationCategory = string.IsNullOrWhiteSpace(application.Category)
                             ? "General"
                             : application.Category;
-
-                    if (!applicationCategory.Equals(
-                            category.Trim(),
+                    if (!applicationCategory.Equals(category.Trim(),
                             StringComparison.OrdinalIgnoreCase))
                     {
-                        errors.Add(
-                            $"Subject row {row}: Category does not match.");
-
+                        errors.Add($"Subject row {row}: Category does not match.");
                         continue;
                     }
                 }
 
-                // =================================================
                 // DYNAMIC SUBJECT VALIDATION
-                // =================================================
-                var selectedSubject =
-                    await _context.StudentApplicationSubjects
-                        .FirstOrDefaultAsync(x =>
-                            x.StudentApplicationId ==
-                                application.Id &&
-                            x.SubjectName ==
-                                subjectName);
-
+                var selectedSubject = await _context.StudentApplicationSubjects
+                        .FirstOrDefaultAsync(x => x.StudentApplicationId == application.Id && x.SubjectName == subjectName);
                 if (selectedSubject == null)
                 {
-                    errors.Add(
-                        $"Subject row {row}: '{subjectName}' is not a subject selected by the student.");
-
+                    errors.Add($"Subject row {row}: '{subjectName}' is not a subject selected by the student.");
                     continue;
                 }
-
                 // FIND / CREATE RESULT
-                var examResult =
-                    await _context.ExamResults
-                        .FirstOrDefaultAsync(x =>
-                            x.StudentApplicationId ==
-                                application.Id &&
-                            x.ExamId == examId);
-
+                var examResult = await _context.ExamResults
+                        .FirstOrDefaultAsync(x => x.StudentApplicationId == application.Id && x.ExamId == examId);
                 if (examResult == null)
                 {
                     examResult = new ExamResult
                     {
-                        StudentApplicationId =
-                            application.Id,
-
+                        StudentApplicationId = application.Id,
                         ExamId = examId,
-
                         TotalMarks = 0,
-
                         ObtainedMarks = 0,
-
                         Percentage = 0,
-
                         ResultStatus = "Draft",
-
                         CutoffStatus = "Pending",
-
                         IsPublished = false,
-
                         CreatedAt = DateTime.UtcNow
                     };
-
                     _context.ExamResults
                         .Add(examResult);
-
                     await _context.SaveChangesAsync();
                 }
-
                 if (examResult.IsPublished)
                 {
-                    errors.Add(
-                        $"Subject row {row}: Result is already published.");
-
+                    errors.Add($"Subject row {row}: Result is already published.");
                     continue;
                 }
-
-                var percentage =
-                    Math.Round(
-                        (obtainedMarks / totalMarks) * 100,
-                        2);
-
-                var subjectResult =
-                    await _context.ExamResultSubjects
-                        .FirstOrDefaultAsync(x =>
-                            x.ExamResultId ==
-                                examResult.Id &&
-                            x.SubjectName ==
-                                subjectName);
-
+                var percentage =Math.Round((obtainedMarks / totalMarks) * 100,2);
+                var subjectResult = await _context.ExamResultSubjects
+                        .FirstOrDefaultAsync(x => x.ExamResultId == examResult.Id && x.SubjectName == subjectName);
                 if (subjectResult == null)
                 {
-                    subjectResult =
-                        new ExamResultSubject
+                    subjectResult = new ExamResultSubject
                         {
-                            ExamResultId =
-                                examResult.Id,
-
-                            SubjectName =
-                                subjectName,
-
-                            TotalMarks =
-                                totalMarks,
-
-                            ObtainedMarks =
-                                obtainedMarks,
-
-                            Percentage =
-                                percentage,
-
-                            CreatedAt =
-                                DateTime.UtcNow
+                            ExamResultId = examResult.Id,
+                            SubjectName = subjectName,
+                            TotalMarks = totalMarks,
+                            ObtainedMarks = obtainedMarks,
+                            Percentage = percentage,
+                            CreatedAt = DateTime.UtcNow
                         };
-
                     _context.ExamResultSubjects
                         .Add(subjectResult);
                 }
                 else
                 {
-                    subjectResult.TotalMarks =
-                        totalMarks;
-
-                    subjectResult.ObtainedMarks =
-                        obtainedMarks;
-
-                    subjectResult.Percentage =
-                        percentage;
-
-                    subjectResult.UpdatedAt =
-                        DateTime.UtcNow;
+                    subjectResult.TotalMarks = totalMarks;
+                    subjectResult.ObtainedMarks = obtainedMarks;
+                    subjectResult.Percentage = percentage;
+                    subjectResult.UpdatedAt = DateTime.UtcNow;
                 }
-
                 subjectSuccess++;
             }
-
             await _context.SaveChangesAsync();
 
-            // =====================================================
             // 2. RECALCULATE OVERALL RESULT FROM SUBJECT MARKS
-            // =====================================================
-            var results =
-                await _context.ExamResults
-                    .Where(x =>
-                        x.ExamId == examId)
+            var results = await _context.ExamResults
+                    .Where(x => x.ExamId == examId)
                     .ToListAsync();
 
             foreach (var result in results)
             {
-                var subjects =
-                    await _context.ExamResultSubjects
-                        .Where(x =>
-                            x.ExamResultId ==
-                                result.Id)
+                var subjects = await _context.ExamResultSubjects
+                        .Where(x => x.ExamResultId == result.Id)
                         .ToListAsync();
-
                 if (!subjects.Any())
                 {
                     continue;
                 }
 
                 // TOTAL = SUM OF SUBJECT TOTAL MARKS
-                result.TotalMarks =
-                    subjects.Sum(x =>
-                        x.TotalMarks);
+                result.TotalMarks = subjects.Sum(x => x.TotalMarks);
 
                 // OBTAINED = SUM OF SUBJECT OBTAINED MARKS
-                result.ObtainedMarks =
-                    subjects.Sum(x =>
-                        x.ObtainedMarks);
-
+                result.ObtainedMarks = subjects.Sum(x => x.ObtainedMarks);
                 // PERCENTAGE
                 if (result.TotalMarks > 0)
                 {
-                    result.Percentage =
-                        Math.Round(
-                            (result.ObtainedMarks /
-                             result.TotalMarks) * 100,
-                            2);
+                    result.Percentage = Math.Round((result.ObtainedMarks / result.TotalMarks) * 100,2);
                 }
+                result.ResultStatus = "Completed";
+                result.IsPublished = false;
+                result.PublishedAt = null;
+                result.UpdatedAt = DateTime.UtcNow;
 
-                result.ResultStatus =
-                    "Completed";
-
-                result.IsPublished =
-                    false;
-
-                result.PublishedAt =
-                    null;
-
-                result.UpdatedAt =
-                    DateTime.UtcNow;
-
-                // =================================================
                 // CUTOFF
-                // =================================================
-                var application =
-                    await _context.StudentApplications
-                        .FirstOrDefaultAsync(x =>
-                            x.Id ==
-                            result.StudentApplicationId);
-
+                var application = await _context.StudentApplications
+                        .FirstOrDefaultAsync(x => x.Id == result.StudentApplicationId);
                 if (application == null)
                 {
                     continue;
                 }
-
-                var studentCategory =
-                    string.IsNullOrWhiteSpace(
-                        application.Category)
+                var studentCategory = string.IsNullOrWhiteSpace(application.Category)
                         ? "General"
                         : application.Category;
-
-                var cutoff =
-                    await _context.ExamCutoffs
+                var cutoff = await _context.ExamCutoffs
                         .FirstOrDefaultAsync(x =>
                             x.ExamId == examId &&
-                            x.Category ==
-                                studentCategory &&
-                            x.IsActive);
-
+                            x.Category == studentCategory && x.IsActive);
                 if (cutoff == null)
                 {
-                    result.CutoffStatus =
-                        "Pending";
+                    result.CutoffStatus = "Pending";
                 }
-                else if (
-                    cutoff.CutoffType ==
-                    "Percentage")
+                else if (cutoff.CutoffType == "Percentage")
                 {
-                    result.CutoffStatus =
-                        result.Percentage >=
-                        cutoff.CutoffValue
+                    result.CutoffStatus = result.Percentage >= cutoff.CutoffValue
                             ? "Qualified"
                             : "Not Qualified";
                 }
                 else
                 {
-                    result.CutoffStatus =
-                        "Pending";
+                    result.CutoffStatus = "Pending";
                 }
             }
-
             await _context.SaveChangesAsync();
-
-            // =====================================================
             // SUCCESS / ERROR MESSAGE
-            // =====================================================
             if (subjectSuccess > 0)
             {
-                overallSuccess =
-                    await _context.ExamResults
-                        .CountAsync(x =>
-                            x.ExamId == examId &&
-                            x.ResultStatus ==
-                                "Completed");
+                overallSuccess = await _context.ExamResults
+                        .CountAsync(x => x.ExamId == examId && x.ResultStatus == "Completed");
             }
 
-            if (overallSuccess > 0 ||
-                subjectSuccess > 0)
+            if (overallSuccess > 0 || subjectSuccess > 0)
             {
-                TempData["SuccessMessage"] =
-                    $"Excel imported successfully. Results: {overallSuccess}, Subjects: {subjectSuccess}.";
+                TempData["SuccessMessage"] = $"Excel imported successfully. Results: {overallSuccess}, Subjects: {subjectSuccess}.";
             }
-
             if (errors.Any())
             {
-                TempData["ErrorMessage"] =
-                    string.Join(
-                        " | ",
-                        errors.Take(10));
-
+                TempData["ErrorMessage"] = string.Join(" | ",errors.Take(10));
                 if (errors.Count > 10)
                 {
-                    TempData["ErrorMessage"] +=
-                        $" | And {errors.Count - 10} more error(s).";
+                    TempData["ErrorMessage"] += $" | And {errors.Count - 10} more error(s).";
                 }
             }
-
-            return RedirectToAction(
-                nameof(Index),
+            return RedirectToAction(nameof(Index),
                 new
                 {
                     examId,
@@ -864,682 +517,402 @@ namespace ExamManagement.Controllers
                 });
         }
 
-        // =========================================================
         // SAVE / UPDATE CUTOFF
-        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveCutoff(
-            int examId,
-            string category,
-            string cutoffType,
-            decimal cutoffValue)
+        public async Task<IActionResult> SaveCutoff(int examId,string category,string cutoffType,decimal cutoffValue)
         {
             if (string.IsNullOrWhiteSpace(category))
             {
-                TempData["ErrorMessage"] =
-                    "Category is required.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Category is required.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
                         examId
                     });
             }
-
             if (cutoffValue < 0 ||
                 cutoffValue > 100)
             {
-                TempData["ErrorMessage"] =
-                    "Cut-off value must be between 0 and 100.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Cut-off value must be between 0 and 100.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
                         examId
                     });
             }
-
             var exam = await _context.Exams
                 .FirstOrDefaultAsync(x =>
                     x.Id == examId);
-
             if (exam == null)
             {
-                return NotFound(
-                    "Exam not found.");
+                return NotFound("Exam not found.");
             }
-
-            var cutoff =
-                await _context.ExamCutoffs
+            var cutoff = await _context.ExamCutoffs
                     .FirstOrDefaultAsync(x =>
                         x.ExamId == examId &&
                         x.Category == category);
-
             if (cutoff == null)
             {
                 cutoff = new ExamCutoff
                 {
                     ExamId = examId,
-
                     Category = category,
-
                     CutoffType = cutoffType,
-
                     CutoffValue = cutoffValue,
-
                     IsActive = true,
-
                     CreatedAt = DateTime.UtcNow
                 };
-
                 _context.ExamCutoffs
                     .Add(cutoff);
             }
             else
             {
-                cutoff.CutoffType =
-                    cutoffType;
-
-                cutoff.CutoffValue =
-                    cutoffValue;
-
+                cutoff.CutoffType = cutoffType;
+                cutoff.CutoffValue = cutoffValue;
                 cutoff.IsActive = true;
-
-                cutoff.UpdatedAt =
-                    DateTime.UtcNow;
+                cutoff.UpdatedAt = DateTime.UtcNow;
             }
-
             await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] =
-                $"{category} cut-off saved successfully.";
-
-            return RedirectToAction(
-                nameof(Index),
+            TempData["SuccessMessage"] = $"{category} cut-off saved successfully.";
+            return RedirectToAction(nameof(Index),
                 new
                 {
                     examId
                 });
         }
 
-        // =========================================================
         // DISABLE CUTOFF
-        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DisableCutoff(
-            int id,
-            int examId)
+        public async Task<IActionResult> DisableCutoff(int id,int examId)
         {
-            var cutoff =
-                await _context.ExamCutoffs
+            var cutoff = await _context.ExamCutoffs
                     .FirstOrDefaultAsync(x =>
                         x.Id == id);
-
             if (cutoff == null)
             {
                 return NotFound();
             }
-
             cutoff.IsActive = false;
-
-            cutoff.UpdatedAt =
-                DateTime.UtcNow;
-
+            cutoff.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] =
-                "Cut-off disabled successfully.";
-
-            return RedirectToAction(
-                nameof(Index),
+            TempData["SuccessMessage"] = "Cut-off disabled successfully.";
+            return RedirectToAction(nameof(Index),
                 new
                 {
                     examId
                 });
         }
 
-        // =========================================================
         // SAVE RESULT
-        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveResult(
-            int applicationId,
-            decimal totalMarks,
-            decimal obtainedMarks)
+        public async Task<IActionResult> SaveResult(int applicationId,
+            decimal totalMarks,decimal obtainedMarks)
         {
-            var application =
-                await _context.StudentApplications
-                    .FirstOrDefaultAsync(x =>
-                        x.Id == applicationId);
+            var application =  await _context.StudentApplications
+                    .FirstOrDefaultAsync(x => x.Id == applicationId);
 
             if (application == null)
             {
-                return NotFound(
-                    "Application not found.");
+                return NotFound("Application not found.");
             }
-
             if (application.Status != "Approved")
             {
-                TempData["ErrorMessage"] =
-                    "Only approved applications can receive results.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Only approved applications can receive results.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            application.ExamId
+                        examId = application.ExamId
                     });
             }
 
             if (totalMarks <= 0)
             {
-                TempData["ErrorMessage"] =
-                    "Total marks must be greater than zero.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Total marks must be greater than zero.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            application.ExamId
+                        examId = application.ExamId
                     });
             }
 
-            if (obtainedMarks < 0 ||
-                obtainedMarks > totalMarks)
+            if (obtainedMarks < 0 || obtainedMarks > totalMarks)
             {
-                TempData["ErrorMessage"] =
-                    "Obtained marks must be between 0 and total marks.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Obtained marks must be between 0 and total marks.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            application.ExamId
+                        examId = application.ExamId
                     });
             }
-
-            var percentage =
-                Math.Round(
-                    (obtainedMarks / totalMarks) * 100,
-                    2);
-
-            var result =
-                await _context.ExamResults
-                    .FirstOrDefaultAsync(x =>
-                        x.StudentApplicationId ==
-                            applicationId &&
-                        x.ExamId ==
-                            application.ExamId);
-
+            var percentage = Math.Round((obtainedMarks / totalMarks) * 100,2);
+            var result = await _context.ExamResults
+                    .FirstOrDefaultAsync(x => x.StudentApplicationId ==
+                            applicationId && x.ExamId == application.ExamId);
             if (result == null)
             {
                 result = new ExamResult
                 {
-                    StudentApplicationId =
-                        applicationId,
-
-                    ExamId =
-                        application.ExamId,
-
-                    CreatedAt =
-                        DateTime.UtcNow
+                    StudentApplicationId = applicationId,
+                    ExamId = application.ExamId,
+                    CreatedAt = DateTime.UtcNow
                 };
-
                 _context.ExamResults
                     .Add(result);
             }
-
-            result.TotalMarks =
-                totalMarks;
-
-            result.ObtainedMarks =
-                obtainedMarks;
-
-            result.Percentage =
-                percentage;
-
-            result.ResultStatus =
-                "Completed";
-
-            result.CutoffStatus =
-                "Pending";
-
-            result.IsPublished =
-                false;
-
-            result.UpdatedAt =
-                DateTime.UtcNow;
+            result.TotalMarks = totalMarks;
+            result.ObtainedMarks = obtainedMarks;
+            result.Percentage = percentage;
+            result.ResultStatus = "Completed";
+            result.CutoffStatus = "Pending";
+            result.IsPublished = false;
+            result.UpdatedAt = DateTime.UtcNow;
 
             // CUTOFF
-            var category =
-                string.IsNullOrWhiteSpace(
-                    application.Category)
+            var category = string.IsNullOrWhiteSpace(application.Category)
                     ? "General"
                     : application.Category;
-
-            var cutoff =
-                await _context.ExamCutoffs
+            var cutoff = await _context.ExamCutoffs
                     .FirstOrDefaultAsync(x =>
-                        x.ExamId ==
-                            application.ExamId &&
-                        x.Category ==
-                            category &&
-                        x.IsActive);
+                        x.ExamId == application.ExamId &&
+                        x.Category == category && x.IsActive);
 
             if (cutoff != null)
             {
-                if (cutoff.CutoffType ==
-                    "Percentage")
+                if (cutoff.CutoffType == "Percentage")
                 {
-                    result.CutoffStatus =
-                        percentage >=
-                        cutoff.CutoffValue
+                    result.CutoffStatus = percentage >= cutoff.CutoffValue
                             ? "Qualified"
                             : "Not Qualified";
                 }
             }
             else
             {
-                result.CutoffStatus =
-                    "Pending";
+                result.CutoffStatus = "Pending";
             }
 
             await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] =
-                "Result saved and cut-off evaluated successfully.";
-
-            return RedirectToAction(
-                nameof(Index),
+            TempData["SuccessMessage"] = "Result saved and cut-off evaluated successfully.";
+            return RedirectToAction(nameof(Index),
                 new
                 {
-                    examId =
-                        application.ExamId
+                    examId = application.ExamId
                 });
         }
 
-        // =========================================================
         // SAVE / UPDATE SUBJECT RESULT
-        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveSubjectResult(
-            int applicationId,
-            string subjectName,
-            decimal totalMarks,
-            decimal obtainedMarks)
+        public async Task<IActionResult> SaveSubjectResult(int applicationId,
+            string subjectName,decimal totalMarks,decimal obtainedMarks)
         {
-            var application =
-                await _context.StudentApplications
+            var application = await _context.StudentApplications
                     .FirstOrDefaultAsync(x =>
                         x.Id == applicationId);
 
             if (application == null)
             {
-                return NotFound(
-                    "Application not found.");
+                return NotFound("Application not found.");
             }
 
             if (application.Status != "Approved")
             {
-                TempData["ErrorMessage"] =
-                    "Only approved applications can receive results.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Only approved applications can receive results.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            application.ExamId
+                        examId = application.ExamId
                     });
             }
 
-            if (string.IsNullOrWhiteSpace(
-                    subjectName))
+            if (string.IsNullOrWhiteSpace(subjectName))
             {
-                TempData["ErrorMessage"] =
-                    "Subject is required.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Subject is required.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            application.ExamId
+                        examId = application.ExamId
                     });
             }
 
             // DYNAMIC SUBJECT VALIDATION
-            var selectedSubject =
-                await _context.StudentApplicationSubjects
+            var selectedSubject = await _context.StudentApplicationSubjects
                     .FirstOrDefaultAsync(x =>
-                        x.StudentApplicationId ==
-                            applicationId &&
-                        x.SubjectName ==
-                            subjectName);
-
+                        x.StudentApplicationId == applicationId && x.SubjectName == subjectName);
             if (selectedSubject == null)
             {
-                TempData["ErrorMessage"] =
-                    $"{subjectName} is not selected by this student.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = $"{subjectName} is not selected by this student.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            application.ExamId
+                        examId = application.ExamId
                     });
             }
-
             if (totalMarks <= 0)
             {
-                TempData["ErrorMessage"] =
-                    "Total marks must be greater than zero.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Total marks must be greater than zero.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            application.ExamId
+                        examId = application.ExamId
                     });
             }
-
-            if (obtainedMarks < 0 ||
-                obtainedMarks > totalMarks)
+            if (obtainedMarks < 0 || obtainedMarks > totalMarks)
             {
-                TempData["ErrorMessage"] =
-                    "Obtained marks must be between 0 and total marks.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Obtained marks must be between 0 and total marks.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            application.ExamId
+                        examId = application.ExamId
                     });
             }
-
-            var examResult =
-                await _context.ExamResults
+            var examResult = await _context.ExamResults
                     .FirstOrDefaultAsync(x =>
-                        x.StudentApplicationId ==
-                            applicationId &&
-                        x.ExamId ==
-                            application.ExamId);
-
+                        x.StudentApplicationId == applicationId && x.ExamId == application.ExamId);
             if (examResult == null)
             {
                 examResult = new ExamResult
                 {
-                    StudentApplicationId =
-                        applicationId,
-
-                    ExamId =
-                        application.ExamId,
-
+                    StudentApplicationId = applicationId,
+                    ExamId = application.ExamId,
                     TotalMarks = 0,
-
                     ObtainedMarks = 0,
-
                     Percentage = 0,
-
-                    ResultStatus =
-                        "Draft",
-
-                    CutoffStatus =
-                        "Pending",
-
-                    IsPublished =
-                        false,
-
-                    CreatedAt =
-                        DateTime.UtcNow
+                    ResultStatus = "Draft",
+                    CutoffStatus = "Pending",
+                    IsPublished = false,
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 _context.ExamResults
                     .Add(examResult);
-
                 await _context.SaveChangesAsync();
             }
-
             if (examResult.IsPublished)
             {
-                TempData["ErrorMessage"] =
-                    "Result is already published.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Result is already published.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            application.ExamId
+                        examId = application.ExamId
                     });
             }
-
-            var percentage =
-                Math.Round(
-                    (obtainedMarks / totalMarks) * 100,
-                    2);
-
-            var subjectResult =
-                await _context.ExamResultSubjects
+            var percentage = Math.Round((obtainedMarks / totalMarks) * 100,2);
+            var subjectResult = await _context.ExamResultSubjects
                     .FirstOrDefaultAsync(x =>
-                        x.ExamResultId ==
-                            examResult.Id &&
-                        x.SubjectName ==
-                            subjectName);
+                        x.ExamResultId == examResult.Id && x.SubjectName == subjectName);
 
             if (subjectResult == null)
             {
-                subjectResult =
-                    new ExamResultSubject
+                subjectResult = new ExamResultSubject
                     {
-                        ExamResultId =
-                            examResult.Id,
-
-                        SubjectName =
-                            subjectName,
-
-                        TotalMarks =
-                            totalMarks,
-
-                        ObtainedMarks =
-                            obtainedMarks,
-
-                        Percentage =
-                            percentage,
-
-                        CreatedAt =
-                            DateTime.UtcNow
+                        ExamResultId = examResult.Id,
+                        SubjectName = subjectName,
+                        TotalMarks = totalMarks,
+                        ObtainedMarks = obtainedMarks,
+                        Percentage = percentage,
+                        CreatedAt = DateTime.UtcNow
                     };
-
                 _context.ExamResultSubjects
                     .Add(subjectResult);
             }
             else
             {
-                subjectResult.TotalMarks =
-                    totalMarks;
-
-                subjectResult.ObtainedMarks =
-                    obtainedMarks;
-
-                subjectResult.Percentage =
-                    percentage;
-
-                subjectResult.UpdatedAt =
-                    DateTime.UtcNow;
+                subjectResult.TotalMarks = totalMarks;
+                subjectResult.ObtainedMarks = obtainedMarks;
+                subjectResult.Percentage = percentage;
+                subjectResult.UpdatedAt = DateTime.UtcNow;
             }
-
             await _context.SaveChangesAsync();
 
-            // =====================================================
             // RECALCULATE OVERALL RESULT
-            // =====================================================
-            var subjects =
-                await _context.ExamResultSubjects
-                    .Where(x =>
-                        x.ExamResultId ==
-                            examResult.Id)
+            var subjects = await _context.ExamResultSubjects
+                    .Where(x => x.ExamResultId == examResult.Id)
                     .ToListAsync();
 
-            examResult.TotalMarks =
-                subjects.Sum(x =>
-                    x.TotalMarks);
-
-            examResult.ObtainedMarks =
-                subjects.Sum(x =>
-                    x.ObtainedMarks);
-
+            examResult.TotalMarks = subjects.Sum(x => x.TotalMarks);
+            examResult.ObtainedMarks = subjects.Sum(x => x.ObtainedMarks);
             if (examResult.TotalMarks > 0)
             {
-                examResult.Percentage =
-                    Math.Round(
-                        (examResult.ObtainedMarks /
-                         examResult.TotalMarks) * 100,
-                        2);
+                examResult.Percentage = Math.Round((examResult.ObtainedMarks / examResult.TotalMarks) * 100,2);
             }
-
-            examResult.ResultStatus =
-                "Completed";
-
-            examResult.IsPublished =
-                false;
-
-            examResult.PublishedAt =
-                null;
-
-            examResult.UpdatedAt =
-                DateTime.UtcNow;
-
-            // =====================================================
+            examResult.ResultStatus = "Completed";
+            examResult.IsPublished = false;
+            examResult.PublishedAt = null;
+            examResult.UpdatedAt = DateTime.UtcNow;
             // CUTOFF
-            // =====================================================
-            var category =
-                string.IsNullOrWhiteSpace(
-                    application.Category)
+            var category = string.IsNullOrWhiteSpace( application.Category)
                     ? "General"
                     : application.Category;
 
-            var cutoff =
-                await _context.ExamCutoffs
+            var cutoff = await _context.ExamCutoffs
                     .FirstOrDefaultAsync(x =>
-                        x.ExamId ==
-                            application.ExamId &&
-                        x.Category ==
-                            category &&
-                        x.IsActive);
+                        x.ExamId == application.ExamId && x.Category == category && x.IsActive);
 
             if (cutoff == null)
             {
-                examResult.CutoffStatus =
-                    "Pending";
+                examResult.CutoffStatus = "Pending";
             }
-            else if (
-                cutoff.CutoffType ==
-                "Percentage")
+            else if (cutoff.CutoffType == "Percentage")
             {
-                examResult.CutoffStatus =
-                    examResult.Percentage >=
-                    cutoff.CutoffValue
+                examResult.CutoffStatus = examResult.Percentage >= cutoff.CutoffValue
                         ? "Qualified"
                         : "Not Qualified";
             }
             else
             {
-                examResult.CutoffStatus =
-                    "Pending";
+                examResult.CutoffStatus = "Pending";
             }
 
             await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] =
-                $"{subjectName} marks saved successfully.";
-
-            return RedirectToAction(
-                nameof(Index),
+            TempData["SuccessMessage"] = $"{subjectName} marks saved successfully.";
+            return RedirectToAction(nameof(Index),
                 new
                 {
-                    examId =
-                        application.ExamId
+                    examId = application.ExamId
                 });
         }
 
-        // =========================================================
         // PUBLISH RESULT
-        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PublishResult(
-            int resultId)
+        public async Task<IActionResult> PublishResult(int resultId)
         {
-            var result =
-                await _context.ExamResults
-                    .FirstOrDefaultAsync(x =>
-                        x.Id == resultId);
+            var result = await _context.ExamResults
+                    .FirstOrDefaultAsync(x => x.Id == resultId);
 
             if (result == null)
             {
-                return NotFound(
-                    "Result not found.");
+                return NotFound("Result not found.");
             }
 
-            if (result.ResultStatus !=
-                "Completed")
+            if (result.ResultStatus != "Completed")
             {
-                TempData["ErrorMessage"] =
-                    "Complete the result before publishing.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Complete the result before publishing.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            result.ExamId
+                        examId = result.ExamId
                     });
             }
 
-            if (result.CutoffStatus ==
-                "Pending")
+            if (result.CutoffStatus =="Pending")
             {
-                TempData["ErrorMessage"] =
-                    "Cut-off evaluation is still pending.";
-
-                return RedirectToAction(
-                    nameof(Index),
+                TempData["ErrorMessage"] = "Cut-off evaluation is still pending.";
+                return RedirectToAction(nameof(Index),
                     new
                     {
-                        examId =
-                            result.ExamId
+                        examId = result.ExamId
                     });
             }
-
-            result.IsPublished =
-                true;
-
-            result.PublishedAt =
-                DateTime.UtcNow;
-
-            result.UpdatedAt =
-                DateTime.UtcNow;
-
+            result.IsPublished = true;
+            result.PublishedAt = DateTime.UtcNow;
+            result.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] =
-                "Result published successfully.";
-
-            return RedirectToAction(
-                nameof(Index),
+            TempData["SuccessMessage"] = "Result published successfully.";
+            return RedirectToAction(nameof(Index),
                 new
                 {
                     examId =
